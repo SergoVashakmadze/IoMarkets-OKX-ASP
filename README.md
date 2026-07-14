@@ -70,6 +70,7 @@ docs/DEPLOY.md      deploy + submit checklist for the Jul 17 deadline
 ## Status / TODO
 
 - [x] Data + proof endpoints, MCP manifest, signing, verifier
-- [ ] Confirm 3 OKX values (wallet 0x, X Layer USDC contract, broker URL) — see `docs/DEPLOY.md`
+- [x] Confirm OKX config — X Layer `eip155:196`, USDT0 `0x779d…3736`, SDK `@okxweb3/x402-*` (`docs/OKX_X402_REFERENCE.md`)
+- [ ] Create Agentic Wallet (email login via agent) → paste its 0x into `.env` `X402_PAY_TO`
 - [ ] Wire live OKX ws → QuestDB ingest (sample rows work for the demo meanwhile)
 - [ ] Register A2MCP service, pass review, go live

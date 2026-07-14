@@ -3,8 +3,9 @@
 Copy-paste source for the OKX.AI ASP registration form (name, description, service
 list, default pricing). Register as **Agent-to-MCP (A2MCP)**.
 
-> Values marked `<confirm>` come from OKX onboarding and can't be guessed:
-> your Agentic Wallet 0x address, the X Layer USDC contract, and the broker/facilitator URL.
+> Config values are confirmed in `docs/OKX_X402_REFERENCE.md`. The one thing you
+> generate during setup is your **Agentic Wallet 0x address** (payTo), provisioned
+> when you log in via the Onchain OS agent with your email.
 
 ## Identity
 
@@ -29,7 +30,7 @@ _Roadmap (add to same ASP later): `get_imbalance` ($0.003), `get_candles` ($0.00
 
 ## Default pricing
 
-- **Default per-call price:** $0.002 USDC (`get_vwap`).
+- **Default per-call price:** $0.002 USDT0 (`get_vwap`; `2000` min units).
 - **Rationale:** data tier priced for high-volume agent traffic (sub-cent); verification tier 5× because a signed, on-chain-anchored proof is the defensible product. Fits **Revenue Rocket** — many tiny settlements, visible on-chain volume.
 
 ## x402 endpoint config
@@ -47,6 +48,6 @@ _Roadmap (add to same ASP later): `get_imbalance` ($0.003), `get_candles` ($0.00
 
 ## Step 3 — X post (#OKXAI)
 
-> My ASP @IoMarkets is live on @OKX_AI: autonomous agents pay per call in USDC on X Layer and get back **verifiable** market truth — an ed25519-signed price proof anchored to the settlement tx. No API keys, no accounts, just x402. Demo ↓ #OKXAI
+> My ASP @IoMarkets is live on @OKX_AI: autonomous agents pay per call in USDT0 on X Layer and get back **verifiable** market truth — an ed25519-signed price proof anchored to the settlement tx. No API keys, no accounts, just x402. Demo ↓ #OKXAI
 
 Pair with a ≤90s screen recording: the agent firing paid calls + the settlement tx on the X Layer explorer.

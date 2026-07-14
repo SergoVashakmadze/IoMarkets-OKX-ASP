@@ -43,7 +43,7 @@ export const config = {
     maxTimeoutSeconds: 300,
   },
 
-  // Per-call prices (USDC). Single source of truth for the paywall + landing +
+  // Per-call prices (USDT0). Single source of truth for the paywall + landing +
   // MCP manifest so they never drift.
   prices: {
     get_vwap: "$0.002",

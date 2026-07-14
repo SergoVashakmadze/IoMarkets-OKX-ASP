@@ -7,7 +7,7 @@ import { config } from "../config.js";
 export interface McpTool {
   name: string;
   description: string;
-  price: string; // per-call, USDC
+  price: string; // per-call, USDT0
   paid: boolean;
   input_schema: Record<string, unknown>;
   output_example: Record<string, unknown>;

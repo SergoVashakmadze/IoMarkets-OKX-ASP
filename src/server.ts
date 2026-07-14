@@ -2,7 +2,7 @@
 //
 // PATH A (this file): the server exposes clean data endpoints and holds NO
 // private keys and NO in-process payment code. OKX's Broker/facilitator sits in
-// front as a reverse proxy: it 402s unpaid calls, settles USDC on X Layer, then
+// front as a reverse proxy: it 402s unpaid calls, settles USDT0 on X Layer, then
 // forwards the paid request to us — optionally carrying the settlement tx id in a
 // header so the verification tier can anchor its signed proof.
 //
