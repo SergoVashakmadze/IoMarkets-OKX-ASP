@@ -53,6 +53,7 @@ docker compose up -d                 # QuestDB on :9000 (console) / :8812 (pg)
 cp .env.example .env                 # fill QuestDB; add OKX x402 vars when ready
 pnpm install
 pnpm gen-key >> .env                 # then prune to the two PROOF_* lines
+pnpm ingest                          # stream live OKX trades → QuestDB (Ctrl-C to stop)
 pnpm start                           # server on :3000
 curl localhost:3000/health           # { ok, questdb, proof, x402 }
 curl localhost:3000/mcp/tools        # the A2MCP manifest
@@ -69,6 +70,7 @@ src/proof/sign.ts   ed25519 attestation signing (chain-neutral)
 src/mcp/tools.ts    A2MCP tool manifest (service list + prices)
 sql/schema.sql      trades table + reference queries
 scripts/gen-key.ts  generate the proof keypair
+scripts/ingest.ts   OKX public WebSocket trades → QuestDB (live market data)
 scripts/verify-proof.ts  standalone third-party verifier
 docs/OKX_X402_REFERENCE.md  confirmed OKX values + registration flow + marketplace notes
 docs/ASP_LISTING.md OKX.AI registration copy (name/description/services/pricing)
@@ -84,5 +86,5 @@ docs/HACKATHON.md   requirements, deadline, master checklist
 - [ ] Apply for OKX Developer Portal creds → `OKX_API_KEY/SECRET/PASSPHRASE`
 - [ ] Create Agentic Wallet (email login via agent) → `X402_PAY_TO`
 - [ ] Deploy on HTTPS+domain host; run `curl -i → 402` self-check on testnet (`eip155:1952`)
-- [ ] Wire live OKX ws → QuestDB ingest (sample rows work for the demo meanwhile)
+- [x] Live OKX ws → QuestDB ingester (`pnpm ingest`) — WS path verified against the live feed
 - [ ] Register A2MCP service, pass review, go live

@@ -15,10 +15,22 @@ export const config = {
 
   questdb: {
     host: req("QUESTDB_HOST", "127.0.0.1"),
-    port: Number(process.env.QUESTDB_PORT ?? "8812"),
+    port: Number(process.env.QUESTDB_PORT ?? "8812"), // PG wire (queries)
+    ilpPort: Number(process.env.QUESTDB_ILP_PORT ?? "9000"), // ILP over HTTP (ingest)
     user: req("QUESTDB_USER", "admin"),
     password: req("QUESTDB_PASSWORD", "quest"),
     database: req("QUESTDB_DATABASE", "qdb"),
+  },
+
+  // Live ingest: OKX public WebSocket trades → QuestDB `trades` table.
+  ingest: {
+    wsUrl: process.env.OKX_WS_URL ?? "wss://ws.okx.com:8443/ws/v5/public",
+    // Instruments to stream (OKX instId, hyphenated). Default matches the app's
+    // default query pair. BTC-USDT is the most liquid if you want denser data.
+    pairs: (process.env.DATA_PAIRS ?? "BTC-USDC")
+      .split(",")
+      .map((s) => s.trim())
+      .filter(Boolean),
   },
 
   // Verification tier. Empty until you run `pnpm gen-key`; the proof endpoint
