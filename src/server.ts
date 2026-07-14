@@ -32,6 +32,11 @@ const PROOF_EXT_KEY = "iomarkets-proof";
 
 const app = express();
 
+// Behind a TLS-terminating proxy (Cloudflare Tunnel / Caddy / nginx): trust the
+// X-Forwarded-Proto header so req.protocol is "https" and the x402 challenge's
+// resource.url is built with https:// (OKX requires a public HTTPS endpoint).
+app.set("trust proxy", true);
+
 // ── x402 payment middleware (priced routes) ───────────────────────────────────
 // Only mounted when the OKX facilitator creds + receiving wallet are configured;
 // otherwise the routes serve free (useful for local dev before onboarding).
@@ -78,9 +83,12 @@ if (x402Configured()) {
     },
   };
 
-  // syncFacilitatorOnStart=false: don't block/crash boot on the facilitator sync
-  // (it fails loudly with a 401 on bad creds). The SDK syncs lazily instead.
-  app.use(paymentMiddleware(routes, resourceServer, undefined, undefined, false));
+  // syncFacilitatorOnStart=true: fetch the facilitator's supported payment kinds
+  // at boot so buildPaymentRequirements knows `exact` is supported on the network.
+  // (With false, the SDK never initializes supportedKinds and throws on the first
+  // priced request: "Facilitator does not support exact on <network>".) Real creds
+  // are required — a 401 here means the OKX_* creds are wrong.
+  app.use(paymentMiddleware(routes, resourceServer, undefined, undefined, true));
   console.log(`x402 payment middleware active (network=${NETWORK}, payTo=${config.x402.payTo})`);
 } else {
   console.warn(

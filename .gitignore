@@ -4,3 +4,7 @@ node_modules/
 dist/
 .DS_Store
 pnpm-lock.yaml.bak
+# local agent / session tooling (not app code)
+.agents/
+.claude/
+skills-lock.json

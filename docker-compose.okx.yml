@@ -1,0 +1,61 @@
+# IoMarkets.ai — OKX.AI A2MCP (X Layer / USDT0) — PRODUCTION sibling stack.
+#
+# Deployed alongside the existing IoMarkets.ai-x402 (Algorand) stack on the same
+# Hetzner box. It does NOT run its own QuestDB — it joins the existing
+# `iomarkets_default` network and reuses the shared `questdb` container (same
+# `trades` schema, already ingesting BTC-USDC). The existing single Caddy instance
+# fronts this via an `okx.iomarkets.ai` site block (added to /root/iomarkets/Caddyfile).
+#
+# Deploy:  docker compose -f docker-compose.okx.yml up -d --build
+# Health:  curl -s http://127.0.0.1:3001/health   (loopback-bound; via SSH)
+
+services:
+  # x402 API server. Paid routes settle USDT0 on X Layer via the OKX facilitator,
+  # then sign an attestation anchored to the settlement tx. Reaches the shared
+  # QuestDB by service name over iomarkets_default. Caddy reverse-proxies
+  # okx.iomarkets.ai -> okx-server:3000 (internal). Also bound to host loopback
+  # :3001 for on-box health checks.
+  okx-server:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: iomarkets-okx-asp:latest
+    container_name: iomarkets-okx-server
+    restart: unless-stopped
+    command: ["pnpm", "start"]
+    env_file: .env
+    environment:
+      - PORT=3000
+      - QUESTDB_HOST=questdb
+      - QUESTDB_PORT=8812
+      - QUESTDB_ILP_PORT=9000
+      - QUESTDB_USER=admin
+      - QUESTDB_DATABASE=qdb
+    ports:
+      - "127.0.0.1:3001:3000"
+    networks:
+      - iomarkets_default
+
+  # Live OKX public-WebSocket trades -> shared QuestDB (ILP over HTTP). Unlike the
+  # legacy ingester-okx (whose WS closed and never reconnected), this one has
+  # auto-reconnect + ping/pong, keeping BTC-USDC fresh.
+  okx-ingester:
+    image: iomarkets-okx-asp:latest
+    container_name: iomarkets-okx-ingester
+    restart: unless-stopped
+    command: ["pnpm", "ingest"]
+    env_file: .env
+    environment:
+      - QUESTDB_HOST=questdb
+      - QUESTDB_ILP_PORT=9000
+      - DATA_PAIRS=BTC-USDC
+      - DATA_SOURCE=okx
+    depends_on:
+      - okx-server
+    networks:
+      - iomarkets_default
+
+# The existing stack's default network (project dir /root/iomarkets → iomarkets_default).
+networks:
+  iomarkets_default:
+    external: true
