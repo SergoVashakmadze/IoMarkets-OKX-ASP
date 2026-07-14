@@ -1,0 +1,28 @@
+{
+  "name": "iomarkets-okx-asp",
+  "version": "0.1.0",
+  "private": true,
+  "description": "IoMarkets.ai — Verifiable Market-Truth Oracle. A2MCP ASP on OKX.AI: pay-per-call market signals + signed price proofs, settled on X Layer via x402.",
+  "type": "module",
+  "packageManager": "pnpm@10.30.0",
+  "scripts": {
+    "dev": "tsx watch src/server.ts",
+    "start": "tsx src/server.ts",
+    "gen-key": "tsx scripts/gen-key.ts",
+    "verify": "tsx scripts/verify-proof.ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@hono/node-server": "^1.13.7",
+    "@noble/ed25519": "^2.1.0",
+    "@noble/hashes": "^1.6.1",
+    "hono": "^4.6.14",
+    "pg": "^8.13.1"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.2",
+    "@types/pg": "^8.11.10",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.2"
+  }
+}

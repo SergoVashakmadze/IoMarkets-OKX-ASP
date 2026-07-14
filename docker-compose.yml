@@ -1,0 +1,20 @@
+# QuestDB — self-hosted OSS (Apache 2.0). Backs every endpoint.
+#   docker compose up -d
+#   console/ingest → http://localhost:9000   |   PG wire → :8812
+# Then load the schema: open http://localhost:9000 and run sql/schema.sql
+services:
+  questdb:
+    image: questdb/questdb:9.4.3
+    container_name: iomarkets-questdb
+    restart: unless-stopped
+    ports:
+      - "9000:9000"   # web console + ILP over HTTP (ingest)
+      - "8812:8812"   # PG wire (queries)
+    environment:
+      - QDB_PG_USER=admin
+      - QDB_PG_PASSWORD=quest
+    volumes:
+      - questdb-data:/var/lib/questdb
+
+volumes:
+  questdb-data:
