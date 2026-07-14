@@ -37,22 +37,25 @@ Building it is not enough. Submitting it is not enough. It must be **live on OKX
 ## Our submission = IoMarkets.ai (A2MCP)
 
 - **Mode:** Agent-to-MCP (pay-per-call, x402) — see `docs/ASP_LISTING.md`
-- **Chain/rail:** X Layer, USDC, x402
-- **MVP live service:** `get_vwap` ($0.002); `get_price_proof` ($0.01) if broker forwards settlement txid
+- **Chain/rail:** X Layer (`eip155:196`), **USDT0**, x402 via OKX Payment SDK (`@okxweb3/x402-*`)
+- **MVP live service:** `get_vwap` ($0.002 / `2000`); `get_price_proof` ($0.01 / `10000`)
 - **Differentiator:** ed25519-signed, independently-verifiable price proofs
 
 ## Master checklist (details in `docs/DEPLOY.md`)
 
-- [ ] Confirm 3 OKX values: Agentic Wallet 0x, X Layer USDC contract, broker/facilitator URL
-- [ ] Deploy QuestDB + origin on a stable host (not the laptop); `/health` green
-- [ ] Put OKX broker payment in front; unpaid → 402, paid → settles on X Layer
-- [ ] Register A2MCP service (`docs/ASP_LISTING.md`) — **submit by Jul 16 AM**
-- [ ] Confirm ASP shows **LIVE** in the OKX.AI marketplace
+- [x] Confirm OKX x402 values — done: X Layer `eip155:196`, USDT0 `0x779d…3736`, SDK `@okxweb3/x402-*` (`docs/OKX_X402_REFERENCE.md`)
+- [ ] Deploy QuestDB + origin on a stable host with **HTTPS + domain** (not the laptop); `/health` green
+- [ ] Attach OKX Payment SDK middleware; `curl -i` unpaid → **402 + PAYMENT-REQUIRED**
+- [ ] Register + list A2MCP via agent prompts (`docs/OKX_X402_REFERENCE.md`) — **list by Jul 16 AM**
+- [ ] Confirm ASP shows **LIVE** in the OKX.AI marketplace (also reachable via Agent ID pre-review)
 - [ ] Record ≤90s demo (agent paying + X Layer explorer tx)
 - [ ] Post on X with **#OKXAI** (+ link the demo)
 - [ ] File the Google form (ASP details + X post link) **before Jul 17 23:59 UTC**
 
-## Open items to confirm from OKX pages (bot-blocked to headless fetch)
+## Positioning note (from live okx.ai/tasks)
 
-- `okx.ai/tutorial/asp` — exact registration fields + the 3 config values
-- `okx.ai/tasks` — live agent demand (tune service positioning to it)
+Marketplace is brand-new (total volume ~$899), pays in USDT, and demand skews to
+**analysis + on-chain intelligence** (US stock trends, smart-money tracking, wallet
+behavior, prediction markets, World Cup) more than raw price feeds. Our unique angle
+is **verifiable** market truth — lean into that in the X post, and consider an
+analysis/insight wrapper service post-MVP. See `docs/OKX_X402_REFERENCE.md`.

@@ -26,13 +26,21 @@ export const config = {
   proofPrivateKey: process.env.PROOF_PRIVATE_KEY ?? "",
   proofPublicKey: process.env.PROOF_PUBLIC_KEY ?? "",
 
-  // x402 paywall description (advertised to callers / the OKX broker). These
-  // don't move money on their own — OKX's Broker settles on X Layer.
+  // x402 paywall config — CONFIRMED values from OKX's A2MCP guide
+  // (web3.okx.com/onchainos/dev-docs/okxai/howtomcp). The recommended path is the
+  // OKX Payment SDK (@okxweb3/x402-*), which builds the 402 challenge, verifies
+  // the EIP-3009 payment, and settles on X Layer — you only write business logic.
   x402: {
+    // payTo = your OKX Agentic Wallet 0x address (provisioned when you log in via
+    // the Onchain OS agent with your email). Fill after wallet login.
     payTo: process.env.X402_PAY_TO ?? "",
-    network: process.env.X402_NETWORK ?? "eip155:196", // X Layer mainnet
-    asset: process.env.X402_ASSET ?? "",
-    facilitatorUrl: process.env.X402_FACILITATOR_URL ?? "",
+    network: process.env.X402_NETWORK ?? "eip155:196", // CAIP-2, 196 = X Layer mainnet
+    // Official settlement stablecoin on X Layer = USDT0 (USD₮0), decimals = 6.
+    asset: process.env.X402_ASSET ?? "0x779ded0c9e1022225f8e0630b35a9b54be713736",
+    assetName: "USD₮0",
+    assetVersion: "1",
+    assetDecimals: 6,
+    maxTimeoutSeconds: 300,
   },
 
   // Per-call prices (USDC). Single source of truth for the paywall + landing +

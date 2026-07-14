@@ -1,9 +1,10 @@
 # IoMarkets.ai — OKX.AI A2MCP ASP
 
 **Verifiable market-truth oracle for autonomous agents.** Pay-per-call crypto market
-signals and ed25519-signed price proofs, settled in USDC on **X Layer** via **x402**.
+signals and ed25519-signed price proofs, settled in **USDT0 on X Layer** via **x402**.
 Built as an **Agent-to-MCP (A2MCP)** service for the **OKX.AI** marketplace
-(OKX AI Genesis Hackathon).
+(OKX AI Genesis Hackathon). Confirmed OKX config + registration flow:
+[`docs/OKX_X402_REFERENCE.md`](docs/OKX_X402_REFERENCE.md).
 
 > Ported from the Algorand/x402 build (`IoMarkets.ai-x402`) to OKX.AI + X Layer.
 > The market-data core, SQL, and proof-signing scheme carry over; only the payment
@@ -25,18 +26,18 @@ zero trust in us. See `scripts/verify-proof.ts`.
 ## Architecture (Path A — deadline-safe)
 
 ```
-agent ──x402──▶ OKX Broker/facilitator ──(settles USDC on X Layer)──▶ this origin
-                     │                                                    │
-                402 if unpaid                                    clean data endpoints
-                                                          (no keys, no payment code here)
+agent ──x402──▶ [OKX Payment SDK middleware] ──(settles USDT0 on X Layer)──▶ handler
+                        │                                                       │
+                   402 if unpaid                                      QuestDB query + sign
 ```
 
-The origin holds no private keys and no in-process payment logic — OKX's Broker
-handles 402s, RPC, gas, and settlement, then forwards the paid request. For the
-verification tier the broker forwards the settlement tx id in a header, which the
-proof route signs into the attestation. (If your broker can't forward that header,
-move `/v1/proof/price` to the in-process OKX Payment SDK — "Path B"; the data route
-is unaffected.)
+Recommended path (confirmed from OKX docs): the **OKX Payment SDK** (`@okxweb3/x402-*`,
+Node.js) attaches as middleware — it builds the 402 challenge, verifies the EIP-3009
+payment, and settles USDT0 on X Layer; you only write the business logic. Because
+settlement happens in-process, the verification tier gets the settlement tx directly
+and signs it into the attestation (no header plumbing). This repo's `server.ts` keeps
+the handlers SDK-agnostic; wiring the middleware is the one remaining integration step
+(see `docs/DEPLOY.md`).
 
 ## Quick start
 

@@ -16,7 +16,7 @@ list, default pricing). Register as **Agent-to-MCP (A2MCP)**.
 > Pay-per-call crypto market signals (VWAP) and ed25519-signed price proofs your agent can verify without trusting us. x402 on X Layer.
 
 **Long description:**
-> IoMarkets.ai is a QuestDB-backed market-data service for autonomous agents. Every call is a single x402 micropayment in USDC on X Layer — no accounts, no API keys, no subscription. A cheap high-volume **signals** tier (VWAP) gives agents live market state; a premium **verification** tier returns an ed25519-signed attestation anchored to the on-chain settlement tx — an independently checkable proof of market truth (verify the signature against our published public key, confirm the tx settled on X Layer). Machine-payable, machine-verifiable, real-time.
+> IoMarkets.ai is a QuestDB-backed market-data service for autonomous agents. Every call is a single x402 micropayment in USDT0 on X Layer — no accounts, no API keys, no subscription. A cheap high-volume **signals** tier (VWAP) gives agents live market state; a premium **verification** tier returns an ed25519-signed attestation anchored to the on-chain settlement tx — an independently checkable proof of market truth (verify the signature against our published public key, confirm the tx settled on X Layer). Machine-payable, machine-verifiable, real-time.
 
 ## Service list (A2MCP tools)
 
@@ -34,15 +34,16 @@ _Roadmap (add to same ASP later): `get_imbalance` ($0.003), `get_candles` ($0.00
 
 ## x402 endpoint config
 
-| Field | Value |
+| Field | Value (confirmed — see `docs/OKX_X402_REFERENCE.md`) |
 |---|---|
 | Scheme | `exact` (EIP-3009) |
-| Network | X Layer — `eip155:196` (mainnet) / `eip155:195` (testnet) |
-| Settlement token | USDC on X Layer — `<confirm contract>` |
-| payTo | OKX Agentic Wallet 0x address — `<confirm>` |
-| Facilitator / Broker | OKX OnchainOS — `<confirm URL>` |
-| Public endpoints | `https://<vps>/v1/signal/vwap`, `https://<vps>/v1/proof/price` |
-| MCP manifest | `https://<vps>/mcp/tools` |
+| Network | X Layer — `eip155:196` (mainnet) |
+| Settlement token | **USDT0** — `0x779ded0c9e1022225f8e0630b35a9b54be713736` (decimals 6) |
+| Prices (min units) | `get_vwap` = `2000` ($0.002) · `get_price_proof` = `10000` ($0.01) |
+| payTo | OKX Agentic Wallet 0x address — provisioned at wallet login |
+| SDK | `@okxweb3/x402-*` (Node.js) — builds 402 + verifies + settles |
+| Public endpoints (HTTPS+domain required) | `https://<domain>/v1/signal/vwap`, `.../v1/proof/price` |
+| MCP manifest | `https://<domain>/mcp/tools` |
 
 ## Step 3 — X post (#OKXAI)
 

@@ -127,14 +127,14 @@ app.get("/", (c) =>
 </style></head><body><div class="wrap">
   <h1>IoMarkets.ai<br><span class="g">verifiable market-truth, paid per call</span></h1>
   <p class="lead">An agent-native market-data service on <b>OKX.AI</b>. Every call is a single
-    x402 micropayment in USDC on <b>X Layer</b> — no accounts, no API keys. The verification tier
+    x402 micropayment in USDT0 on <b>X Layer</b> — no accounts, no API keys. The verification tier
     returns an ed25519-signed price proof anchored to its on-chain settlement tx: verify it yourself,
     trust no one.</p>
   <table><thead><tr><th>Service (MCP tool)</th><th>Returns</th><th>Price/call</th></tr></thead><tbody>
     <tr><td><code>get_vwap</code></td><td>Volume-weighted average price</td><td class="p">${config.prices.get_vwap}</td></tr>
     <tr><td><code>get_price_proof</code></td><td>Signed point-in-time price attestation</td><td class="p">${config.prices.get_price_proof}</td></tr>
   </tbody></table>
-  <footer>OKX.AI A2MCP · x402 on X Layer · USDC settlement · QuestDB-backed ·
+  <footer>OKX.AI A2MCP · x402 on X Layer · USDT0 settlement · QuestDB-backed ·
     <a href="/mcp/tools" style="color:#06b6d4">/mcp/tools</a> · <a href="/health" style="color:#06b6d4">/health</a></footer>
 </div></body></html>`),
 );
