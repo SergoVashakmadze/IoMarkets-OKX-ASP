@@ -23,54 +23,66 @@ The proof is the differentiator: verify the signature against the published publ
 key **and** confirm the settlement tx on X Layer ⇒ trustworthy market truth, with
 zero trust in us. See `scripts/verify-proof.ts`.
 
-## Architecture (Path A — deadline-safe)
+## Architecture (OKX Payment SDK — wired)
 
 ```
-agent ──x402──▶ [OKX Payment SDK middleware] ──(settles USDT0 on X Layer)──▶ handler
-                        │                                                       │
-                   402 if unpaid                                      QuestDB query + sign
+agent ──▶ paymentMiddleware ──(402 if unpaid)──▶ pay ──▶ handler ──▶ settle
+              @okxweb3/x402-express                         │           │
+                                          proof route: sign settled tx ─┘ via the
+                                          "iomarkets-proof" settlement extension
 ```
 
-Recommended path (confirmed from OKX docs): the **OKX Payment SDK** (`@okxweb3/x402-*`,
-Node.js) attaches as middleware — it builds the 402 challenge, verifies the EIP-3009
-payment, and settles USDT0 on X Layer; you only write the business logic. Because
-settlement happens in-process, the verification tier gets the settlement tx directly
-and signs it into the attestation (no header plumbing). This repo's `server.ts` keeps
-the handlers SDK-agnostic; wiring the middleware is the one remaining integration step
-(see `docs/DEPLOY.md`).
+`src/server.ts` is an **Express** app with the **OKX Payment SDK** wired
+(`@okxweb3/x402-express` + `@okxweb3/x402-evm` + `@okxweb3/x402-core`): the payment
+middleware builds the 402 challenge, verifies the EIP-3009 payment, and settles
+USDT0 on X Layer via the OKX facilitator. `get_vwap` returns data after payment;
+`get_price_proof` uses a registered **settlement extension** — after the payment
+settles, it signs an ed25519 attestation anchored to the real settlement tx
+(`context.result.transaction`) and returns it under
+`response.extensions["iomarkets-proof"]`.
+
+Priced routes serve **free** until all four x402 vars are set (`X402_PAY_TO`,
+`OKX_API_KEY/SECRET/PASSPHRASE`), so you can run locally before OKX onboarding.
+The paid 402 self-check requires real OKX Developer Portal credentials.
 
 ## Quick start
 
 ```bash
 docker compose up -d                 # QuestDB on :9000 (console) / :8812 (pg)
 # load schema: open http://localhost:9000 and run sql/schema.sql
-cp .env.example .env                 # fill QuestDB + the 3 OKX x402 values
+cp .env.example .env                 # fill QuestDB; add OKX x402 vars when ready
 pnpm install
 pnpm gen-key >> .env                 # then prune to the two PROOF_* lines
 pnpm start                           # server on :3000
-curl localhost:3000/health
-curl 'localhost:3000/v1/signal/vwap?pair=BTC-USDC'
+curl localhost:3000/health           # { ok, questdb, proof, x402 }
 curl localhost:3000/mcp/tools        # the A2MCP manifest
+# once the 4 x402 vars are set, the OKX self-check:
+curl -i 'localhost:3000/v1/signal/vwap?pair=BTC-USDC'   # → HTTP 402 + PAYMENT-REQUIRED
 ```
 
 ## Layout
 
 ```
-src/server.ts       Hono server — data + proof routes, MCP manifest, health, landing
+src/server.ts       Express server — OKX Payment SDK middleware, data + proof routes, MCP, health, landing
 src/db/questdb.ts   QuestDB queries (getVwap, getPriceAt)
 src/proof/sign.ts   ed25519 attestation signing (chain-neutral)
 src/mcp/tools.ts    A2MCP tool manifest (service list + prices)
 sql/schema.sql      trades table + reference queries
 scripts/gen-key.ts  generate the proof keypair
 scripts/verify-proof.ts  standalone third-party verifier
+docs/OKX_X402_REFERENCE.md  confirmed OKX values + registration flow + marketplace notes
 docs/ASP_LISTING.md OKX.AI registration copy (name/description/services/pricing)
 docs/DEPLOY.md      deploy + submit checklist for the Jul 17 deadline
+docs/HACKATHON.md   requirements, deadline, master checklist
 ```
 
 ## Status / TODO
 
-- [x] Data + proof endpoints, MCP manifest, signing, verifier
-- [x] Confirm OKX config — X Layer `eip155:196`, USDT0 `0x779d…3736`, SDK `@okxweb3/x402-*` (`docs/OKX_X402_REFERENCE.md`)
-- [ ] Create Agentic Wallet (email login via agent) → paste its 0x into `.env` `X402_PAY_TO`
+- [x] Express + OKX Payment SDK middleware wired (`@okxweb3/x402-*`); typecheck clean; boots
+- [x] Data + proof endpoints, MCP manifest, ed25519 signing + verifier
+- [x] Confirmed OKX config — X Layer `eip155:196`, USDT0 `0x779d…3736`, SDK (`docs/OKX_X402_REFERENCE.md`)
+- [ ] Apply for OKX Developer Portal creds → `OKX_API_KEY/SECRET/PASSPHRASE`
+- [ ] Create Agentic Wallet (email login via agent) → `X402_PAY_TO`
+- [ ] Deploy on HTTPS+domain host; run `curl -i → 402` self-check on testnet (`eip155:1952`)
 - [ ] Wire live OKX ws → QuestDB ingest (sample rows work for the demo meanwhile)
 - [ ] Register A2MCP service, pass review, go live

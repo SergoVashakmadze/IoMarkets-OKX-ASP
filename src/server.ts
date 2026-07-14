@@ -1,114 +1,175 @@
-// IoMarkets.ai — OKX.AI A2MCP service (X Layer / x402).
+// IoMarkets.ai — OKX.AI A2MCP service (X Layer / x402), Express + OKX Payment SDK.
 //
-// PATH A (this file): the server exposes clean data endpoints and holds NO
-// private keys and NO in-process payment code. OKX's Broker/facilitator sits in
-// front as a reverse proxy: it 402s unpaid calls, settles USDT0 on X Layer, then
-// forwards the paid request to us — optionally carrying the settlement tx id in a
-// header so the verification tier can anchor its signed proof.
+// The OKX Payment SDK (@okxweb3/x402-*) attaches as Express middleware: it builds
+// the 402 PAYMENT-REQUIRED challenge for priced routes, verifies the EIP-3009
+// payment, and settles USDT0 on X Layer via the OKX facilitator. We only write the
+// business logic (the QuestDB query + the signature).
 //
-// This keeps the origin dead-simple and deployable today. The proof tier still
-// signs a real, independently-verifiable attestation as long as the broker
-// forwards a settlement reference (see SETTLEMENT_TXID_HEADER). If your broker
-// setup cannot forward that header, move the proof route to the in-process SDK
-// (Path B) — the data route is unaffected either way.
+//   agent ──▶ paymentMiddleware ──(402 if unpaid)──▶ pay ──▶ handler ──▶ settle
+//                                                                          │
+//                              proof route: sign the settled tx via the ───┘
+//                              "iomarkets-proof" settlement extension
+//
+// Docs: web3.okx.com/onchainos/dev-docs/payments/service-seller-sdk
 
-import { serve } from "@hono/node-server";
-import { Hono, type Context } from "hono";
+import { AsyncLocalStorage } from "node:async_hooks";
+import express, { type Request, type Response } from "express";
+import { paymentMiddleware, x402ResourceServer } from "@okxweb3/x402-express";
+import { ExactEvmScheme } from "@okxweb3/x402-evm/exact/server";
+import { OKXFacilitatorClient } from "@okxweb3/x402-core";
+import type { RoutesConfig } from "@okxweb3/x402-core/server";
+import type { Network } from "@okxweb3/x402-core/types";
 
-import { config, proofConfigured } from "./config.js";
+import { config, proofConfigured, x402Configured } from "./config.js";
 import * as db from "./db/questdb.js";
-import { sign } from "./proof/sign.js";
+import { sign, type AttestationPayload } from "./proof/sign.js";
 import { tools } from "./mcp/tools.js";
 
-const app = new Hono();
 const P = "/v1";
 const CHAIN = "x-layer";
+const NETWORK = config.x402.network as Network;
+const PROOF_EXT_KEY = "iomarkets-proof";
 
-// Header(s) the OKX broker may use to forward the on-chain settlement reference
-// after it settles a paid call. We accept a few common spellings.
-function settlementTxid(c: Context): string | undefined {
-  const direct =
-    c.req.header("x-settlement-txid") ??
-    c.req.header("x-payment-txid") ??
-    c.req.header("x-settlement-tx");
-  if (direct) return direct;
-  // Some brokers forward the base64 x402 PAYMENT-RESPONSE object instead.
-  const raw = c.req.header("payment-response") ?? c.req.header("x-payment-response");
-  if (!raw) return undefined;
-  try {
-    const d = JSON.parse(Buffer.from(raw, "base64").toString("utf8")) as Record<string, unknown>;
-    return (d.transaction ?? d.txHash ?? d.txid) as string | undefined;
-  } catch {
-    return undefined;
-  }
+const app = express();
+
+// ── x402 payment middleware (priced routes) ───────────────────────────────────
+// Only mounted when the OKX facilitator creds + receiving wallet are configured;
+// otherwise the routes serve free (useful for local dev before onboarding).
+if (x402Configured()) {
+  const facilitator = new OKXFacilitatorClient({
+    apiKey: config.x402.apiKey,
+    secretKey: config.x402.secretKey,
+    passphrase: config.x402.passphrase,
+  });
+
+  const resourceServer = new x402ResourceServer(facilitator).register(
+    NETWORK,
+    new ExactEvmScheme(),
+  );
+
+  // Verification tier: after settlement, sign an attestation anchored to the real
+  // settled tx and return it under response.extensions["iomarkets-proof"]. The
+  // handler stashes what-to-sign on the async-local store (below); this reads it
+  // plus the settled txid (context.result.transaction).
+  resourceServer.registerExtension({
+    key: PROOF_EXT_KEY,
+    async enrichSettlementResponse(_declaration, context) {
+      if (!proofConfigured()) return undefined;
+      const pending = proofStore.getStore()?.pending;
+      if (!pending) return undefined;
+      return sign(
+        { ...pending, chain: CHAIN, settlement_txid: context.result.transaction },
+        config.proofPrivateKey,
+      );
+    },
+  });
+
+  const routes: RoutesConfig = {
+    [`GET ${P}/signal/vwap`]: {
+      accepts: [{ scheme: "exact", network: NETWORK, payTo: config.x402.payTo, price: config.prices.get_vwap }],
+      description: "Volume-weighted average price for a trading pair",
+      mimeType: "application/json",
+    },
+    [`GET ${P}/proof/price`]: {
+      accepts: [{ scheme: "exact", network: NETWORK, payTo: config.x402.payTo, price: config.prices.get_price_proof }],
+      description: "Signed point-in-time price attestation (anchored to the settlement tx)",
+      mimeType: "application/json",
+      extensions: { [PROOF_EXT_KEY]: {} }, // opt this route into the proof extension
+    },
+  };
+
+  // syncFacilitatorOnStart=false: don't block/crash boot on the facilitator sync
+  // (it fails loudly with a 401 on bad creds). The SDK syncs lazily instead.
+  app.use(paymentMiddleware(routes, resourceServer, undefined, undefined, false));
+  console.log(`x402 payment middleware active (network=${NETWORK}, payTo=${config.x402.payTo})`);
+} else {
+  console.warn(
+    "x402 NOT configured (set X402_PAY_TO + OKX_API_KEY/SECRET/PASSPHRASE) — priced routes serve FREE. Dev only.",
+  );
 }
 
+// Carries the proof route's to-sign payload from the handler to the settlement
+// extension within a single request's async context.
+type ProofPending = Omit<AttestationPayload, "server_pubkey" | "chain" | "settlement_txid">;
+const proofStore = new AsyncLocalStorage<{ pending?: ProofPending }>();
+app.use((_req, _res, next) => proofStore.run({}, next));
+
 // ── DATA TIER — get_vwap ──────────────────────────────────────────────────────
-app.get(`${P}/signal/vwap`, async (c) => {
-  const symbol = c.req.query("pair") ?? "BTC-USDC";
-  const windowMin = Number(c.req.query("window_min") ?? "5");
+app.get(`${P}/signal/vwap`, async (req: Request, res: Response) => {
+  const symbol = (req.query.pair as string) ?? "BTC-USDC";
+  const windowMin = Number(req.query.window_min ?? "5");
   try {
-    return c.json(await db.getVwap(symbol, windowMin));
+    res.json(await db.getVwap(symbol, windowMin));
   } catch (e) {
     console.error("vwap query failed:", (e as Error).message);
-    return c.json({ error: "market data unavailable" }, 503);
+    res.status(503).json({ error: "market data unavailable" });
   }
 });
 
 // ── VERIFICATION TIER — get_price_proof ───────────────────────────────────────
-// Returns an ed25519-signed attestation anchored to the settlement tx. Never
-// emits a proof it can't anchor: no signing key or no settlement ref ⇒ error.
-app.get(`${P}/proof/price`, async (c) => {
+// The handler produces the price data and stashes what-to-sign; the actual
+// ed25519 attestation (anchored to the settled txid) is attached by the
+// "iomarkets-proof" settlement extension above. Never emits a proof unless the
+// call was paid (settlement runs) and signing is configured.
+app.get(`${P}/proof/price`, async (req: Request, res: Response) => {
   if (!proofConfigured()) {
-    return c.json({ error: "proof signing not configured (run `pnpm gen-key`)" }, 503);
+    res.status(503).json({ error: "proof signing not configured (run `pnpm gen-key`)" });
+    return;
   }
-  const txid = settlementTxid(c);
-  if (!txid) {
-    return c.json(
-      { error: "settlement reference absent; proof requires a paid (x402-settled) call" },
-      402,
-    );
-  }
-  const symbol = c.req.query("pair") ?? "BTC-USDC";
-  const at = c.req.query("at") ?? new Date().toISOString();
+  const symbol = (req.query.pair as string) ?? "BTC-USDC";
+  const at = (req.query.at as string) ?? new Date().toISOString();
 
   let row;
   try {
     row = await db.getPriceAt(symbol, at);
   } catch (e) {
     console.error("price-at query failed:", (e as Error).message);
-    return c.json({ error: "market data unavailable" }, 503);
+    res.status(503).json({ error: "market data unavailable" });
+    return;
   }
-  if (!row) return c.json({ error: "no data at or before timestamp" }, 404);
+  if (!row) {
+    res.status(404).json({ error: "no data at or before timestamp" });
+    return;
+  }
 
-  const attestation = sign(
-    {
+  const store = proofStore.getStore();
+  if (store) {
+    store.pending = {
       query_ts: new Date().toISOString(),
       symbol,
       source_ts: row.source_ts,
       price: row.price,
       source: row.source,
-      chain: CHAIN,
-      settlement_txid: txid,
-    },
-    config.proofPrivateKey,
-  );
-  return c.json(attestation);
+    };
+  }
+  // The signed attestation arrives in extensions["iomarkets-proof"] after settlement.
+  res.json({
+    symbol,
+    source_ts: row.source_ts,
+    price: row.price,
+    source: row.source,
+    attestation: `see response extensions["${PROOF_EXT_KEY}"] (ed25519, anchored to settlement tx)`,
+  });
 });
 
 // ── MCP manifest (free) ───────────────────────────────────────────────────────
-// The A2MCP tool list a calling agent reads to discover services + prices.
-app.get("/mcp/tools", (c) => c.json({ tools }));
-app.get("/.well-known/mcp/tools.json", (c) => c.json({ tools }));
+app.get("/mcp/tools", (_req, res) => res.json({ tools }));
+app.get("/.well-known/mcp/tools.json", (_req, res) => res.json({ tools }));
 
 // ── health (free) ─────────────────────────────────────────────────────────────
-app.get("/health", async (c) =>
-  c.json({ ok: true, chain: CHAIN, questdb: await db.ping(), proof: proofConfigured() }),
+app.get("/health", async (_req, res) =>
+  res.json({
+    ok: true,
+    chain: CHAIN,
+    questdb: await db.ping(),
+    proof: proofConfigured(),
+    x402: x402Configured(),
+  }),
 );
 
 // ── landing (free) ────────────────────────────────────────────────────────────
-app.get("/", (c) =>
-  c.html(`<!doctype html><html lang="en"><head><meta charset="utf-8">
+app.get("/", (_req, res) =>
+  res.type("html").send(`<!doctype html><html lang="en"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>IoMarkets.ai — verifiable market-truth, paid per call (OKX.AI · X Layer)</title>
 <style>
@@ -139,7 +200,7 @@ app.get("/", (c) =>
 </div></body></html>`),
 );
 
-serve({ fetch: app.fetch, port: config.port }, (info) => {
-  console.log(`IoMarkets.ai A2MCP listening on :${info.port} (chain=${CHAIN})`);
+app.listen(config.port, () => {
+  console.log(`IoMarkets.ai A2MCP listening on :${config.port} (chain=${CHAIN})`);
   console.log(`Services: ${tools.map((t) => t.name).join(", ")}`);
 });

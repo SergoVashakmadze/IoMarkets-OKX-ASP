@@ -26,21 +26,22 @@ export const config = {
   proofPrivateKey: process.env.PROOF_PRIVATE_KEY ?? "",
   proofPublicKey: process.env.PROOF_PUBLIC_KEY ?? "",
 
-  // x402 paywall config — CONFIRMED values from OKX's A2MCP guide
-  // (web3.okx.com/onchainos/dev-docs/okxai/howtomcp). The recommended path is the
-  // OKX Payment SDK (@okxweb3/x402-*), which builds the 402 challenge, verifies
-  // the EIP-3009 payment, and settles on X Layer — you only write business logic.
+  // x402 payment config — wired to the OKX Payment SDK (@okxweb3/x402-*). The SDK
+  // builds the 402 challenge, verifies the EIP-3009 payment, and settles on X
+  // Layer via the OKX facilitator; we only write business logic. Confirmed values:
+  // web3.okx.com/onchainos/dev-docs/okxai/howtomcp + .../payments/service-seller-sdk
   x402: {
     // payTo = your OKX Agentic Wallet 0x address (provisioned when you log in via
     // the Onchain OS agent with your email). Fill after wallet login.
     payTo: process.env.X402_PAY_TO ?? "",
-    network: process.env.X402_NETWORK ?? "eip155:196", // CAIP-2, 196 = X Layer mainnet
-    // Official settlement stablecoin on X Layer = USDT0 (USD₮0), decimals = 6.
-    asset: process.env.X402_ASSET ?? "0x779ded0c9e1022225f8e0630b35a9b54be713736",
-    assetName: "USD₮0",
-    assetVersion: "1",
-    assetDecimals: 6,
-    maxTimeoutSeconds: 300,
+    // CAIP-2 network. X Layer mainnet = eip155:196, testnet = eip155:1952.
+    network: process.env.X402_NETWORK ?? "eip155:196",
+    // OKX facilitator credentials — apply at the OKX Developer Portal.
+    apiKey: process.env.OKX_API_KEY ?? "",
+    secretKey: process.env.OKX_SECRET_KEY ?? "",
+    passphrase: process.env.OKX_PASSPHRASE ?? "",
+    // Prices are USD strings; the SDK converts to the network stablecoin (USDT0).
+    // Kept here so routes + landing + MCP manifest share one source of truth.
   },
 
   // Per-call prices (USDT0). Single source of truth for the paywall + landing +
@@ -53,3 +54,10 @@ export const config = {
 
 export const proofConfigured = () =>
   config.proofPrivateKey.length > 0 && config.proofPublicKey.length > 0;
+
+/** True once the OKX facilitator creds + receiving wallet are configured. */
+export const x402Configured = () =>
+  config.x402.payTo.startsWith("0x") &&
+  config.x402.apiKey.length > 0 &&
+  config.x402.secretKey.length > 0 &&
+  config.x402.passphrase.length > 0;

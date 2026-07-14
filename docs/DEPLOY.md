@@ -16,13 +16,17 @@ Tokyo). If the desk-note/analysis features call Claude/OpenAI, avoid HK nodes.
 - [ ] Wire real ingest (OKX ws → QuestDB `trades`) OR keep sample rows for the demo
 - [ ] Point domain + TLS (Caddy/nginx) at the origin → `PUBLIC_BASE_URL=https://…`
 
-## 2. Make the paid endpoint x402-compliant (OKX Payment SDK — recommended)
-- [ ] Install the OKX Node SDK: `@okxweb3/x402-*` (see `docs/OKX_X402_REFERENCE.md`)
-- [ ] Attach its payment middleware to `/v1/signal/vwap` (and `/v1/proof/price`);
-      set payTo = Agentic Wallet 0x, network `eip155:196`, asset USDT0, price in min units
-- [ ] For the proof tier, read the settlement tx from the SDK's settlement result and
-      pass it into `sign()` (in-process = the txid is available; no header plumbing)
+## 2. Enable payment (OKX Payment SDK — already wired in `src/server.ts`)
+The middleware is wired (`@okxweb3/x402-express` + `-evm` + `-core`); the proof tier
+signs the settled tx via the `iomarkets-proof` settlement extension. You just supply creds:
+- [ ] Apply for OKX facilitator creds at the OKX Developer Portal → set
+      `OKX_API_KEY` / `OKX_SECRET_KEY` / `OKX_PASSPHRASE` in `.env`
+- [ ] Set `X402_PAY_TO` = your Agentic Wallet 0x (from step 3 below)
+- [ ] **Test on testnet first:** `X402_NETWORK=eip155:1952`; get test OKB + test USDT0 from the X Layer Faucet
 - [ ] **Self-check:** `curl -i https://<domain>/v1/signal/vwap` → **HTTP 402 + PAYMENT-REQUIRED** (unpaid)
+- [ ] Verify a paid call settles + returns data; for `/v1/proof/price`, confirm the signed
+      attestation appears under `extensions["iomarkets-proof"]` and passes `pnpm verify`
+- [ ] Flip `X402_NETWORK=eip155:196` for mainnet once green
 
 ## 3. Register + list via your agent (no web form)
 Install the skill into Claude Code, then prompt (full flow in `docs/OKX_X402_REFERENCE.md`):
