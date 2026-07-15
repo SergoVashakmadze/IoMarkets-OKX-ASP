@@ -1,24 +1,43 @@
 # OKX.AI ASP — Handover / Resume Guide
 
 Snapshot of where the OKX.AI hackathon submission stands and exactly how to finish
-it. Written 2026-07-14. **Deadline: Google form before 2026-07-17 23:59 UTC; aim to
-be LIVE by Jul 16 AM.**
+it. Written 2026-07-14, **updated 2026-07-15**. **Deadline: Google form before
+2026-07-17 23:59 UTC; aim to be LIVE by Jul 16 AM.**
 
 ---
 
 ## TL;DR — what's the current state
 
-The ASP is **built, deployed live, and submitted to OKX for review**. The only thing
-left before the demo is **funding a wallet with ~$5 USDT0** (blocked ~24h on the
-user's side), then recording a short demo and filing the form.
+The ASP is **built, deployed live, and submitted to OKX for review**. Remaining work
+is **funding the wallet** (in progress — see below), then **bridge → demo → X post →
+form**. Every remaining step now has a dedicated doc.
 
 - **OKX Agent identity:** ASP **#5774** "IoMarkets.ai" — status **"Listing under
-  review"** (submitted, awaiting OKX approval ~24h → goes LIVE).
+  review"** as of Jul 15 ~22:44 UTC (~25h in; review ~24h → goes LIVE). Watch it with
+  `./scripts/watch-listing.sh --watch`.
 - **Live endpoint:** https://okx.iomarkets.ai (public HTTPS, permanent, on-chain).
   - `GET /health` → `{ok:true, questdb:true, proof:true, x402:true}`
   - `GET /v1/signal/vwap` ($0.002) and `GET /v1/proof/price` ($0.01) → **HTTP 402 +
     PAYMENT-REQUIRED** (USDT0 on X Layer `eip155:196`, payTo below).
+  - **NEW (Jul 15):** `GET /v1/proof/pubkey` (+ `/.well-known/okx-proof/pubkey.json`)
+    publishes the ed25519 key `a95fc434…43cf4` so proofs verify trustlessly;
+    `/mcp/tools` advertises it as `proof_pubkey_url`. Deployed + verified live.
 - **payTo / Agentic Wallet:** `0x015bfbe816635b173e924688fba8794e30031266` (X Layer).
+
+### Funding status (Jul 15)
+OKX-exchange withdrawal was blocked by a UK first-purchase 24h cooling-off, so funding
+pivoted to **MetaMask**: bought **~24 USDT on Arbitrum** (Banxa — still in a 24h
+cool-off as of Jul 15 night) + **~$17 ETH on Arbitrum** (Ramp — landed, confirmed on
+Arbitrum) for bridge gas. Next: **bridge Arbitrum USDT → X Layer USDT0** to the
+Agentic Wallet — see [`BRIDGE.md`](BRIDGE.md). MetaMask source addr `0x4580…322376`
+(≠ Agentic Wallet — bridge to a **custom recipient**).
+
+### New docs / tooling (Jul 15)
+- [`BRIDGE.md`](BRIDGE.md) — Arbitrum USDT → X Layer USDT0 to the Agentic Wallet
+- [`DEMO_SCRIPT.md`](DEMO_SCRIPT.md) — ≤90s storyboard + #OKXAI X post copy
+- [`FORM_ANSWERS.md`](FORM_ANSWERS.md) — copy-paste Google form answers
+- [`CHASE_ORGANISERS.md`](CHASE_ORGANISERS.md) — wording to expedite listing review
+- `scripts/watch-listing.sh` — poll #5774 until LIVE
 
 ## Where it runs (deployment)
 
@@ -71,16 +90,21 @@ stay stable so existing attestations verify).
 
 ## ⏳ Remaining (do these to finish)
 
-1. **[BLOCKED ~24h] Fund the demo wallet.** Send **~$5 USDT0 on X Layer** to
-   `0x015bfbe816635b173e924688fba8794e30031266`. Details + copy-paste values in
-   [`FUNDING.md`](FUNDING.md). Cleanest = OKX exchange → Withdraw → USDT → network
-   **X Layer** → that address (gasless). NOT TRON, NOT X Layer **Testnet**.
-2. **Confirm the ASP is LIVE.** Check status:
+1. **Fund the demo wallet (in progress).** USDT bought on **Arbitrum** via MetaMask
+   (cooling off ~24h); ETH gas on Arbitrum already landed. When the USDT clears,
+   **bridge Arbitrum USDT → X Layer USDT0** to `0x015bfbe816635b173e924688fba8794e30031266`
+   — full steps in [`BRIDGE.md`](BRIDGE.md). (Original OKX-withdrawal path in
+   [`FUNDING.md`](FUNDING.md) is still valid but was blocked by a 24h cool-off.)
+   NOT TRON, NOT X Layer **Testnet**.
+2. **Confirm the ASP is LIVE.** `./scripts/watch-listing.sh` (one-shot) or `--watch`
+   (poll until LIVE). Under the hood:
    ```
    onchainos agent get-my-agents      # look for #5774 approvalLabel != "under review"
    ```
    If rejected, read the reason and fix via `onchainos agent update` (re-reads QA).
-3. **Record the demo (≤90s).** Once funded, run the paid-call loop:
+   If review stalls past Jul 16 AM, nudge organisers — wording in [`CHASE_ORGANISERS.md`](CHASE_ORGANISERS.md).
+3. **Record the demo (≤90s).** Storyboard + X post in [`DEMO_SCRIPT.md`](DEMO_SCRIPT.md).
+   Once funded, run the paid-call loop:
    ```
    cd /path/to/IoMarkets-OKX-ASP
    ./scripts/demo-pay.sh                 # /v1/signal/vwap  ($0.002)
@@ -89,9 +113,10 @@ stay stable so existing attestations verify).
    Screen-record: the 402 → agent signs → 200 + data, then the settlement tx on the
    X Layer explorer (https://www.okx.com/web3/explorer/xlayer). Show the signed proof
    verifying with `pnpm verify <attestation.json>`.
-4. **Post on X** with **@okx** + **#OKXAI** (draft in [`ASP_LISTING.md`](ASP_LISTING.md)
-   §Step 3, updated handle). Attach the clip.
-5. **File the Google form** (ASP details + X post link) **before Jul 17 23:59 UTC**.
+4. **Post on X** with **#OKXAI** — finalized copy in [`DEMO_SCRIPT.md`](DEMO_SCRIPT.md)
+   (confirm @handles). Attach the clip.
+5. **File the Google form** (ASP details + X post link) **before Jul 17 23:59 UTC** —
+   copy-paste answers in [`FORM_ANSWERS.md`](FORM_ANSWERS.md).
 
 ## Health checks / ops
 
