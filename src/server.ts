@@ -160,9 +160,39 @@ app.get(`${P}/proof/price`, async (req: Request, res: Response) => {
   });
 });
 
+// ── proof public key (free) ───────────────────────────────────────────────────
+// The differentiator's trust anchor: verifiers pin THIS key (out-of-band, not the
+// copy embedded in a paid response) so a get_price_proof attestation is checkable
+// without trusting us — ed25519.verify(signature, canonicalize(payload), public_key),
+// then confirm payload.settlement_txid on the X Layer explorer. Public by design.
+function proofPubkeyBody() {
+  return {
+    algorithm: "ed25519",
+    encoding: "hex",
+    public_key: config.proofPublicKey,
+    verify:
+      "ed25519 verify `signature` over canonicalize(payload); fields signed in order: " +
+      "[query_ts, symbol, source_ts, price, source, chain, settlement_txid, server_pubkey]. " +
+      "Then confirm payload.settlement_txid settled on X Layer.",
+    explorer: "https://www.okx.com/web3/explorer/xlayer",
+  };
+}
+const proofPubkeyHandler = (_req: Request, res: Response) =>
+  config.proofPublicKey
+    ? res.json(proofPubkeyBody())
+    : res.status(503).json({ error: "proof signing not configured" });
+app.get(`${P}/proof/pubkey`, proofPubkeyHandler);
+app.get("/.well-known/okx-proof/pubkey.json", proofPubkeyHandler);
+
 // ── MCP manifest (free) ───────────────────────────────────────────────────────
-app.get("/mcp/tools", (_req, res) => res.json({ tools }));
-app.get("/.well-known/mcp/tools.json", (_req, res) => res.json({ tools }));
+const manifest = () => ({
+  tools,
+  // Advertise the verification trust anchor so an agent can discover, pin, and
+  // check proofs without a prior paid call.
+  proof_pubkey_url: `${config.publicBaseUrl}${P}/proof/pubkey`,
+});
+app.get("/mcp/tools", (_req, res) => res.json(manifest()));
+app.get("/.well-known/mcp/tools.json", (_req, res) => res.json(manifest()));
 
 // ── health (free) ─────────────────────────────────────────────────────────────
 app.get("/health", async (_req, res) =>
