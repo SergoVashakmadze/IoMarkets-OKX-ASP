@@ -235,4 +235,7 @@ ssh root@89.167.70.245 "cd /root/iomarkets-okx && docker compose -f docker-compo
   needs `agent update` (another ~24h review). Keep `okx.iomarkets.ai`.
 - `.money` branding idea shelved; if wanted later, point `iomarkets.money` as a
   redirect (no on-chain change).
-- The demo **self-pays** (payer == payTo), so the $5 is mostly a returnable buffer.
+- **The demo does NOT self-pay any more** (Jul 16). Fund **Account 2, the buyer**
+  (`0x0b2a11d49c2cd72791987d0bc2203729733fdba0`), never the ASP wallet — payer ==
+  payTo may revert and reads as wash volume. `demo-pay.sh` now hard-stops if you try.
+  Payments land in Account 1; both accounts are yours. At $0.002/call, $5 ≈ 2,500 calls.
