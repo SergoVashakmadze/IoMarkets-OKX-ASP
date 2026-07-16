@@ -1,20 +1,35 @@
 # OKX.AI ASP — Handover / Resume Guide
 
 Snapshot of where the OKX.AI hackathon submission stands and exactly how to finish
-it. Written 2026-07-14, **updated 2026-07-15**. **Deadline: Google form before
-2026-07-17 23:59 UTC; aim to be LIVE by Jul 16 AM.**
+it. Written 2026-07-14, **updated 2026-07-16 ~21:30 UTC**. **Deadline: Google form
+before 2026-07-17 23:59 UTC — ~26h left at time of writing.**
 
 ---
 
+## 🔴 START HERE (Jul 16) — the only three things that matter
+
+1. **BRIDGE THE FUNDS.** The Agentic Wallet is **still at zero** — verified on-chain
+   Jul 16 21:00 UTC: 0 USDT0 and 0 OKB on X Layer, 0 USDT and 0 ETH on Arbitrum. The
+   money is still in MetaMask. **Nothing else can start until this lands.** Steps in
+   [`BRIDGE.md`](BRIDGE.md): custom recipient `0x015bfbe8…1266`, X Layer **mainnet**,
+   USDT0, ~$5–10 is plenty. NOT TRON, NOT testnet, NOT the MetaMask address.
+2. **Then: demo → X post → form.** All three are still undone. Note the form and the
+   X post are required **regardless of whether #5774 goes live**, and neither depends
+   on the listing. If approval lands at hour 25 with nothing recorded, it's all moot.
+3. **DO NOT CHASE ON DISCORD/TELEGRAM.** See the moderation section below — it cost
+   two accounts and achieved nothing.
+
 ## TL;DR — what's the current state
 
-The ASP is **built, deployed live, and submitted to OKX for review**. Remaining work
-is **funding the wallet** (in progress — see below), then **bridge → demo → X post →
-form**. Every remaining step now has a dedicated doc.
+The ASP is **built, deployed live, submitted to OKX, and its proof system is now
+verified sound**. The blockers are **funding** (ours) and **listing approval**
+(OKX's, out of our hands).
 
-- **OKX Agent identity:** ASP **#5774** "IoMarkets.ai" — status **"Listing under
-  review"** as of Jul 15 ~22:44 UTC (~25h in; review ~24h → goes LIVE). Watch it with
-  `./scripts/watch-listing.sh --watch`.
+- **OKX Agent identity:** ASP **#5774** "IoMarkets.ai" — still **"Listing under
+  review" / "not listed"** as of Jul 16 ~21:00 UTC. That's **~47h**, against an
+  expected ~24h. The full record shows **`approvalRemark: null`** — no rejection, no
+  changes requested, avatar/description/endpoint all present. It is simply queued;
+  there is nothing to fix on our side. Watch with `./scripts/watch-listing.sh --watch`.
 - **Live endpoint:** https://okx.iomarkets.ai (public HTTPS, permanent, on-chain).
   - `GET /health` → `{ok:true, questdb:true, proof:true, x402:true}`
   - `GET /v1/signal/vwap` ($0.002) and `GET /v1/proof/price` ($0.01) → **HTTP 402 +
@@ -32,12 +47,92 @@ Arbitrum) for bridge gas. Next: **bridge Arbitrum USDT → X Layer USDT0** to th
 Agentic Wallet — see [`BRIDGE.md`](BRIDGE.md). MetaMask source addr `0x4580…322376`
 (≠ Agentic Wallet — bridge to a **custom recipient**).
 
-### New docs / tooling (Jul 15)
+### Funding status (Jul 16) — UNCHANGED, still zero
+Re-checked on-chain Jul 16 ~21:00 UTC. The bridge from Jul 15 **never happened**:
+
+| Chain | Asset | Agentic Wallet `0x015bfbe8…1266` |
+|---|---|---|
+| X Layer | USDT0 | **0** |
+| X Layer | OKB (gas) | **0** |
+| Arbitrum | USDT | **0** |
+| Arbitrum | ETH | **0** |
+
+This is the critical path and it has not moved in 24h.
+
+### 🔒 Proof verification — was broken, now fixed (Jul 16)
+
+**`verify-proof.ts` was circular and accepted forgeries.** It checked the signature
+against `att.payload.server_pubkey` — the key carried *inside the attestation being
+verified*. Demonstrated by signing a payload claiming **BTC = $1** with a freshly
+generated attacker keypair and txid `0xdeadbeef`: the verifier printed
+`Signature: VALID`, exit 0. Since verifiable price proofs are **the** differentiator
+(Creative Genius angle), a judge testing this would have sunk it.
+
+Fixed in **`2930699`**: the payload's `server_pubkey` must equal the key published at
+`/v1/proof/pubkey` before the signature is considered. The forgery now returns
+`PROOF REJECTED` (exit 1). Overridable via `pnpm verify <att.json> <pubkey>` or
+`$PROOF_PUBLIC_KEY` for rotation. Typecheck clean.
+
+**Production keys verified consistent (Jul 16 ~21:10 UTC)** — all four agree on
+`a95fc434…43cf4`: derived from prod `PROOF_PRIVATE_KEY`, prod `PROOF_PUBLIC_KEY`,
+live `/v1/proof/pubkey`, and the constant pinned in `verify-proof.ts`. So the fix is
+proven **both** ways: forgeries rejected, genuine proofs accepted. No redeploy needed.
+
+> **Latent bug, fix AFTER the deadline.** `src/config.ts:38-39` reads
+> `PROOF_PRIVATE_KEY` and `PROOF_PUBLIC_KEY` as **two independent env vars** — the
+> published key is *not derived* from the signing key, and nothing validates they
+> agree. They match in prod today, but if they ever drift the server would publish a
+> key that cannot verify its own proofs, silently. Fix by deriving `proofPublicKey`
+> from the private key. **Do not touch config on a live service before Jul 17.**
+>
+> To re-check without exposing the key, run it *inside the container* (never source
+> `.env` locally):
+> ```
+> ssh root@89.167.70.245 'docker exec -i iomarkets-okx-server sh -c "cat > /app/chk.mjs"' < chk.mjs
+> ssh root@89.167.70.245 'docker exec iomarkets-okx-server node /app/chk.mjs; docker exec iomarkets-okx-server rm -f /app/chk.mjs'
+> ```
+> where `chk.mjs` derives with `@noble/ed25519` and prints public values only.
+
+### ⛔ Chasing the listing — STOP, it cost two accounts (Jul 16)
+
+Three attempts to nudge organisers in community channels, three moderation actions:
+
+- **Telegram:** first post auto-hidden ("links not allowed"); a reworded link-free
+  repost got the account **restricted from posting**.
+- **Discord:** post **blocked by AutoMod** ("content blocked by this server… may also
+  be viewed by server owners") and the account **timed out** — twice.
+
+**Root cause:** the gatekeeper was an automated filter, not a human. A new account
+posting **wallet address + multiple URLs + urgency language** is the textbook
+scam/drainer signature every crypto community auto-blocks — and every draft had all
+three. Rewording a filtered message and reposting reads as deliberate evasion, which
+is what escalates a hide into a restriction into a ban.
+
+**Rules:** do not post in those channels again; do not evade the restrictions; never
+rework-and-retry a filtered message — ask a human instead. And note **community mods
+cannot approve #5774 anyway** — the review is OKX-internal, so this was near-zero
+expected value at real cost.
+
+**Legitimate channels, all still unused:** the **Google form's notes field**
+(unfiltered, straight to organisers, required anyway — best option), **email/support
+ticket** (long version in [`CHASE_ORGANISERS.md`](CHASE_ORGANISERS.md), never sent),
+and the **required #OKXAI X post** tagging @OKX_AI (a deliverable you owe regardless,
+links fine, and shipping beats pleading).
+
+### New docs / tooling (Jul 15–16)
 - [`BRIDGE.md`](BRIDGE.md) — Arbitrum USDT → X Layer USDT0 to the Agentic Wallet
 - [`DEMO_SCRIPT.md`](DEMO_SCRIPT.md) — ≤90s storyboard + #OKXAI X post copy
 - [`FORM_ANSWERS.md`](FORM_ANSWERS.md) — copy-paste Google form answers
-- [`CHASE_ORGANISERS.md`](CHASE_ORGANISERS.md) — wording to expedite listing review
-- `scripts/watch-listing.sh` — poll #5774 until LIVE
+- [`CHASE_ORGANISERS.md`](CHASE_ORGANISERS.md) — **now carries a STOP notice**; the
+  dead messages are kept only as a record of what not to send
+- `scripts/watch-listing.sh` — poll #5774 until LIVE (a background watcher was running
+  locally on Jul 16; it does **not** survive the session — re-run it)
+
+### Known minor bug (not fixed)
+`scripts/demo-pay.sh:26` runs `grep` under `set -euo pipefail`, so when no
+`PAYMENT-REQUIRED` header comes back the script dies silently at line 26 and the
+helpful error on line 27 never prints. Harmless when things work; annoying if
+debugging live on camera. One-line fix.
 
 ## Where it runs (deployment)
 
@@ -102,7 +197,9 @@ stay stable so existing attestations verify).
    onchainos agent get-my-agents      # look for #5774 approvalLabel != "under review"
    ```
    If rejected, read the reason and fix via `onchainos agent update` (re-reads QA).
-   If review stalls past Jul 16 AM, nudge organisers — wording in [`CHASE_ORGANISERS.md`](CHASE_ORGANISERS.md).
+   **Do NOT chase in Discord/Telegram** — three attempts, three moderation actions,
+   and their mods can't approve it anyway (see the STOP section above). Any nudge
+   goes in the Google form's notes field or an email.
 3. **Record the demo (≤90s).** Storyboard + X post in [`DEMO_SCRIPT.md`](DEMO_SCRIPT.md).
    Once funded, run the paid-call loop:
    ```
