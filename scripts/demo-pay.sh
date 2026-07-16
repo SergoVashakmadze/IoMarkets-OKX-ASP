@@ -23,10 +23,13 @@ URL="$BASE$PATH_"
 if [ -f .env ]; then set -a; . ./.env; set +a; fi
 
 echo "── 1. unpaid request → expect HTTP 402 ─────────────────────────────────────"
-CHALLENGE=$(curl -s -D - -o /dev/null "$URL" | grep -i '^payment-required:' | sed 's/^[Pp]ayment-[Rr]equired:[[:space:]]*//' | tr -d '\r')
+# `|| true`: grep exits 1 when the header is absent, and under `set -euo pipefail`
+# that kills the script here — the friendly message below would never print.
+CHALLENGE=$(curl -s -D - -o /dev/null "$URL" | grep -i '^payment-required:' | sed 's/^[Pp]ayment-[Rr]equired:[[:space:]]*//' | tr -d '\r' || true)
 if [ -z "$CHALLENGE" ]; then echo "No PAYMENT-REQUIRED header — is the route priced / server up?"; exit 1; fi
 echo "402 challenge (decoded):"
 echo "$CHALLENGE" | base64 -d 2>/dev/null | (python3 -m json.tool 2>/dev/null || cat)
+PAYTO=$(echo "$CHALLENGE" | base64 -d 2>/dev/null | python3 -c 'import sys,json;print(json.load(sys.stdin)["accepts"][0]["payTo"])' 2>/dev/null || true)
 echo
 
 echo "── 2. sign payment from the Agentic Wallet (TEE) ───────────────────────────"
@@ -34,6 +37,19 @@ PAY_JSON=$(onchainos payment pay --payload "$CHALLENGE")
 echo "$PAY_JSON" | (python3 -c 'import sys,json;d=json.load(sys.stdin)["data"];print("wallet:",d.get("wallet"));print("header:",d.get("header_name"))' 2>/dev/null || echo "$PAY_JSON")
 HDR_NAME=$(echo "$PAY_JSON" | python3 -c 'import sys,json;print(json.load(sys.stdin)["data"]["header_name"])')
 HDR_VAL=$(echo "$PAY_JSON"  | python3 -c 'import sys,json;print(json.load(sys.stdin)["data"]["authorization_header"])')
+
+# The Agentic Wallet signs from the *currently selected* account. Account 1 IS the
+# ASP's payTo, so demoing on it makes the wallet pay itself: the settlement may
+# revert, and if it lands the explorer shows a self-transfer (reads as wash volume).
+PAYER=$(echo "$PAY_JSON" | python3 -c 'import sys,json;print(json.load(sys.stdin)["data"].get("wallet",""))' 2>/dev/null || true)
+if [ -n "$PAYER" ] && [ -n "${PAYTO:-}" ] && [ "${PAYER,,}" = "${PAYTO,,}" ]; then
+  echo "STOP: payer == payTo ($PAYER) — this wallet would be paying itself."
+  echo "      Switch to the buyer account, then re-run:"
+  echo "        onchainos wallet switch <buyer-account-id>   # Account 2"
+  echo "      Afterwards switch back so #5774 lookups keep working:"
+  echo "        onchainos wallet switch <asp-account-id>     # Account 1"
+  exit 1
+fi
 echo
 
 echo "── 3. replay with the payment header → settle + get data ───────────────────"

@@ -1,79 +1,108 @@
-# Bridge — Arbitrum USDT → X Layer USDT0 (fund the Agentic Wallet)
+# Bridge — Arbitrum USDT → X Layer USDT0 (fund the BUYER account)
 
-Tomorrow's first move once the Banxa USDT clears. Goal: move your **USDT on Arbitrum**
-to **USDT0 on X Layer**, delivered to the **Agentic Wallet** so the demo can self-pay.
+Goal: move your **USDT on Arbitrum** to **USDT0 on X Layer**, delivered to the
+**buyer account (Account 2)** so the demo is a real *buyer pays seller* payment.
+
+> **⚠️ CHANGED Jul 16 — the destination is NOT the ASP wallet.**
+> This doc previously said to bridge to `0x015bfbe8…1266` "so the demo can self-pay".
+> That was wrong. `0x015bfbe8…1266` is the ASP's own `payTo` in the 402 challenge, and
+> the Agentic Wallet signs from the *currently selected account* — so funding it would
+> make the wallet pay **itself**. The EIP-3009 settlement may revert on a `from == to`
+> transfer, and if it lands, the explorer shows a self-transfer, which reads as wash
+> volume (bad for the Revenue Rocket angle). **Account 2 was created to be the buyer.**
 
 ## ⚠️ The one thing that must be right: the recipient
-Your MetaMask address and the Agentic Wallet are **different wallets**:
 
 | | Address | Role |
 |---|---|---|
 | MetaMask (source) | `0x4580…322376` | holds the bought USDT + ETH gas |
-| **Agentic Wallet (destination)** | **`0x015bfbe816635b173e924688fba8794e30031266`** | payer/payTo for the x402 demo |
+| **Account 2 — BUYER (destination)** | **`0x0b2a11d49c2cd72791987d0bc2203729733fdba0`** | **bridge here.** Pays for the demo calls |
+| Account 1 — ASP (do NOT bridge here) | `0x015bfbe816635b173e924688fba8794e30031266` | the `payTo`; holds the #5774 identity; receives the payments |
 
-So the bridge must **send to a custom recipient** = the Agentic Wallet. If you bridge
-to the default (your own MetaMask address), the funds land in the wrong wallet and
-you'd need OKB gas to move them again. **Set the recipient explicitly.**
+The bridge must **send to a custom recipient** = the **buyer** address. Bridging to
+the default (your own MetaMask address) leaves funds in the wrong wallet and you'd
+need OKB gas to move them again.
 
-## Preconditions (check first)
-- [ ] Banxa cool-off cleared → **USDT visible on Arbitrum** in MetaMask
-- [ ] **ETH on Arbitrum** for gas (✅ already have ~$17 — confirmed)
-- [ ] You know the destination address (copy it from the table above, verify char-for-char)
+**Account IDs** (for `onchainos wallet switch`):
+- Account 1 — ASP: `a0ad600d-fba7-407d-a895-90114f25fb85`
+- Account 2 — buyer: `f8234c27-f5ad-413b-b935-8f10e0edaa2f`
+
+## Preconditions
+- [x] Banxa cool-off cleared → **USDT visible on Arbitrum** in MetaMask (Jul 16)
+- [x] **ETH on Arbitrum** for gas (~$17 — confirmed)
+- [ ] Destination copied **char-for-char**: `0x0b2a11d49c2cd72791987d0bc2203729733fdba0`
 
 ---
 
 ## Steps — OKX Web3 bridge (recommended: guaranteed X Layer + USDT0)
 
-1. Go to **web3.okx.com** → **Bridge** (cross-chain). Click **Connect Wallet** → MetaMask → approve.
-2. **From:** network **Arbitrum**, token **USDT**. Enter the amount (e.g. ~**20 USDT**;
-   you only need ~$5 for the demo, but bridging more is fine — it self-pays back).
+1. Go to **web3.okx.com** → **Bridge** (cross-chain). **Connect Wallet** → MetaMask → approve.
+2. **From:** network **Arbitrum**, token **USDT**. Amount: ~**20 USDT** is fine
+   (the demo needs ~$5; at $0.002/call that's ~2,500 calls).
 3. **To:** network **X Layer**, token **USDT0**.
 4. **Recipient / "Send to another address":** enable it and paste
-   **`0x015bfbe816635b173e924688fba8794e30031266`**. ⚠️ Double-check it.
+   **`0x0b2a11d49c2cd72791987d0bc2203729733fdba0`** (Account 2, the buyer). ⚠️ Double-check it.
 5. Review the quote (route, fee, est. receive, time — usually a few minutes).
 6. If prompted, **Approve** USDT spending (first tx, small ETH gas), then **Confirm/Bridge**
    (second tx). Sign both in MetaMask.
 7. Wait for "completed". Keep the tx hash.
 
 > If OKX's bridge doesn't expose a custom-recipient field for this route, use the
-> **fallback** below instead — don't bridge to your own address and hope.
+> **fallback** below — don't bridge to your own address and hope.
 
 ## Confirm it landed
 ```bash
-cd /path/to/IoMarkets-OKX-ASP
-onchainos wallet balance --chain xlayer      # expect USDT0 > 0 at the Agentic Wallet
+onchainos wallet switch f8234c27-f5ad-413b-b935-8f10e0edaa2f   # buyer
+onchainos wallet balance --chain xlayer                        # expect USDT0 > 0
+onchainos wallet switch a0ad600d-fba7-407d-a895-90114f25fb85   # back to the ASP identity
 ```
-Also viewable on the explorer: https://www.okx.com/web3/explorer/xlayer (search the wallet address).
+Or check directly (no CLI, no account switching):
+```bash
+curl -s -X POST https://rpc.xlayer.tech -H 'Content-Type: application/json' -d '{"jsonrpc":"2.0","id":1,"method":"eth_call","params":[{"to":"0x779ded0c9e1022225f8e0630b35a9b54be713736","data":"0x70a082310000000000000000000000000b2a11d49c2cd72791987d0bc2203729733fdba0"},"latest"]}'
+```
+Explorer: https://www.okx.com/web3/explorer/xlayer (search the buyer address).
 
 ## Then → run the demo
-Once USDT0 shows on X Layer, follow **docs/DEMO_SCRIPT.md**:
+
+**Switch to the buyer first** — `demo-pay.sh` signs from the selected account, and it
+will now hard-stop with `payer == payTo` if you forget.
+
 ```bash
-onchainos wallet balance --chain xlayer         # show it's funded (on camera)
-./scripts/demo-pay.sh                            # get_vwap  ($0.002)
-./scripts/demo-pay.sh /v1/proof/price            # signed proof ($0.01)
+onchainos wallet switch f8234c27-f5ad-413b-b935-8f10e0edaa2f   # buyer
+onchainos wallet balance --chain xlayer                        # show it's funded (on camera)
+./scripts/demo-pay.sh                                          # get_vwap    ($0.002)
+./scripts/demo-pay.sh /v1/proof/price                          # signed proof ($0.01)
+onchainos wallet switch a0ad600d-fba7-407d-a895-90114f25fb85   # back — #5774 lookups need Account 1
 ```
+
+The explorer will show `0x0b2a11d4… → 0x015bfbe8…`: a buyer agent paying a seller ASP.
+Then verify the proof (`pnpm verify <attestation.json>`) — and consider showing a
+forged one getting `PROOF REJECTED`; it's the strongest beat in the demo.
+
+> **Switch back to Account 1 when done.** `#5774` lives on Account 1, so
+> `watch-listing.sh` and `onchainos agent *` report nothing while Account 2 is active.
 
 ---
 
 ## Fallback A — bridge to your MetaMask on X Layer, then send on
 Use only if no custom-recipient field:
 1. Bridge Arbitrum USDT → X Layer USDT0 to your **own** MetaMask address.
-2. Add **X Layer** network to MetaMask (chainId 196) if needed; you'll need a little
-   **OKB** on X Layer for gas to do step 3 (bridge a tiny bit of ETH→OKB, or use OKX
-   Gas Station). 
-3. **Send** USDT0 → `0x015bfbe816635b173e924688fba8794e30031266`.
-   > Adds a step + needs OKB gas — that's why direct custom-recipient is preferred.
+2. Add **X Layer** (chainId 196) to MetaMask if needed; you'll need a little **OKB**
+   on X Layer for gas to do step 3 (bridge a tiny bit of ETH→OKB, or use OKX Gas Station).
+3. **Send** USDT0 → `0x0b2a11d49c2cd72791987d0bc2203729733fdba0` (the **buyer**).
 
 ## Fallback B — alternate bridges
-Any bridge that supports **X Layer** as a destination **and** a custom recipient works
-(e.g. an aggregator like Bungee/Jumper if it lists X Layer). Same rule: destination =
-the Agentic Wallet address, receive token = USDT0.
+Any bridge supporting **X Layer** as destination **and** a custom recipient works
+(Bungee/Jumper etc. if they list X Layer). Same rule: destination = the **buyer**
+address, receive token = USDT0.
 
 ---
 
 ### Notes
-- Receiving USDT0 needs **no gas** for the recipient — the demo's x402 payments are
-  also gasless for the payer (facilitator relays). So the Agentic Wallet doesn't need
-  OKB just to be funded and run the demo.
-- Bridge only what you're comfortable with; the demo self-pays (payer == payTo), so a
-  small amount cycles through many calls. ~$5–10 of USDT0 is plenty.
+- Receiving USDT0 needs **no gas**, and x402 payments are **gasless for the payer**
+  (the facilitator relays the EIP-3009 authorization). So the buyer needs USDT0 only —
+  no OKB.
+- Payments accumulate in Account 1 (the ASP). Both accounts are yours, so nothing is
+  lost. Moving USDT0 back to Account 2 would need OKB gas — but at $0.002/call you
+  won't need to.
+- ~$5–10 of USDT0 is plenty.
