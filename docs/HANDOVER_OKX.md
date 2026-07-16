@@ -6,18 +6,32 @@ before 2026-07-17 23:59 UTC — ~26h left at time of writing.**
 
 ---
 
-## 🔴 START HERE (Jul 16) — the only three things that matter
+## 🟢 FUNDED & WORKING (Jul 16 ~23:00 UTC) — what's left
 
-1. **BRIDGE THE FUNDS.** The Agentic Wallet is **still at zero** — verified on-chain
-   Jul 16 21:00 UTC: 0 USDT0 and 0 OKB on X Layer, 0 USDT and 0 ETH on Arbitrum. The
-   money is still in MetaMask. **Nothing else can start until this lands.** Steps in
-   [`BRIDGE.md`](BRIDGE.md): custom recipient `0x015bfbe8…1266`, X Layer **mainnet**,
-   USDT0, ~$5–10 is plenty. NOT TRON, NOT testnet, NOT the MetaMask address.
-2. **Then: demo → X post → form.** All three are still undone. Note the form and the
-   X post are required **regardless of whether #5774 goes live**, and neither depends
-   on the listing. If approval lands at hour 25 with nothing recorded, it's all moot.
-3. **DO NOT CHASE ON DISCORD/TELEGRAM.** See the moderation section below — it cost
-   two accounts and achieved nothing.
+**The pipeline is proven end-to-end on production.** Funding landed, the paid call
+works, and the proof tier now actually emits a signed attestation (it never did
+before — see below).
+
+- **Funded.** Banxa delivered 25.39 USDT to the **OKX exchange** (not MetaMask), and
+  it withdrew straight to X Layer with **no cooling-off hold**. Buyer account holds
+  **24.958 USDT0**; the ASP has earned **0.042 USDT0** across 5 real paid calls.
+- **Demo verified live:** 402 → TEE-signed EIP-3009 → settle → 200 + data, payer
+  `0x0b2a11d4…` → payTo `0x015bfbe8…`. A real transfer between two addresses.
+- **Proof tier fixed and verified:** a paid `/v1/proof/price` returns
+  `extensions["iomarkets-proof"]` with payload + signature anchored to the settlement
+  txid; `pnpm verify` says **PROOF ACCEPTED**, and a forgery says **PROOF REJECTED**.
+
+**Remaining — all of it is yours, none of it depends on the listing:**
+
+1. **Record the demo (≤90s)** — storyboard in [`DEMO_SCRIPT.md`](DEMO_SCRIPT.md).
+   Switch to Account 2 first (`onchainos wallet switch f8234c27-…`), or `demo-pay.sh`
+   hard-stops. **Switch back to Account 1 afterwards** or #5774 lookups break.
+   Strongest beat: show a forged attestation getting `PROOF REJECTED`.
+2. **Post on X** with **#OKXAI**, tagging @OKX_AI. Required regardless.
+3. **File the Google form** before **Jul 17 23:59 UTC**. Required regardless. Its
+   notes field is also the only sane channel left for nudging the listing.
+4. **#5774 is still queued** — out of our hands. **DO NOT CHASE ON DISCORD/TELEGRAM**
+   (see the moderation section below: two accounts lost, zero results).
 
 ## TL;DR — what's the current state
 
@@ -47,19 +61,45 @@ Arbitrum) for bridge gas. Next: **bridge Arbitrum USDT → X Layer USDT0** to th
 Agentic Wallet — see [`BRIDGE.md`](BRIDGE.md). MetaMask source addr `0x4580…322376`
 (≠ Agentic Wallet — bridge to a **custom recipient**).
 
-### Funding status (Jul 16) — UNCHANGED, still zero
-Re-checked on-chain Jul 16 ~21:00 UTC. The bridge from Jul 15 **never happened**:
+### Funding status (Jul 16 ~23:00 UTC) — DONE ✅
 
-| Chain | Asset | Agentic Wallet `0x015bfbe8…1266` |
+Banxa delivered to the **OKX exchange**, not MetaMask — which made the bridge
+unnecessary. `FUNDING.md`'s withdrawal route worked with **no cooling-off hold**.
+
+| Where | Balance | Notes |
 |---|---|---|
-| X Layer | USDT0 | **0** |
-| X Layer | OKB (gas) | **0** |
-| Arbitrum | USDT | **0** |
-| Arbitrum | ETH | **0** |
+| **Buyer — Account 2** `0x0b2a11d4…dba0` | **24.958 USDT0** (X Layer) | pays for demo calls |
+| ASP — Account 1 `0x015bfbe8…1266` | **0.042 USDT0** | earned from 5 paid calls |
+| MetaMask `0x45800…22376` (Arbitrum) | 0.00899 ETH (~$16.90) | unused; bridge not needed |
 
-This is the critical path and it has not moved in 24h.
+**Two accounts, and it matters.** The Agentic Wallet had only Account 1, whose X Layer
+address **is** the `payTo` — so funding it would have made the demo pay itself
+(may revert; reads as wash volume). Account 2 was created as the buyer.
 
-### 🔒 Proof verification — was broken, now fixed (Jul 16)
+- Account 1 — ASP identity (**#5774 lives here**): `a0ad600d-fba7-407d-a895-90114f25fb85`
+- Account 2 — buyer: `f8234c27-f5ad-413b-b935-8f10e0edaa2f`
+
+⚠️ `onchainos wallet add` **auto-switches** the active account, which silently breaks
+every `#5774` lookup. Always switch back to Account 1 when done.
+
+### 🔒 Proof EMISSION — was silently broken, now fixed (Jul 16, `e109852`)
+
+**The paid proof tier never returned a proof.** `enrichSettlementResponse` read
+`proofStore.getStore()?.pending`, but the AsyncLocalStorage middleware was registered
+**after** the payment middleware — so the settlement extension ran with no context,
+returned `undefined`, and said nothing. Buyers paid $0.01, got price data, and an
+`attestation` field pointing at an `extensions["iomarkets-proof"]` key that was never
+populated. Proved on production with temporary logging (`hasStore: false`).
+
+Fixed by opening the async context **before** the payment middleware. Verified live:
+the settlement response now carries the signed payload + signature anchored to the
+real txid, `pnpm verify` returns **PROOF ACCEPTED**, and a forgery is **REJECTED**.
+A paid call that emits no proof now **warns** instead of failing silently.
+
+> This was load-bearing: the pubkey endpoint, the verifier's key pinning, and the
+> forgery-rejection demo beat all depended on an attestation the product didn't emit.
+
+### 🔒 Proof VERIFICATION — was circular, now fixed (Jul 16)
 
 **`verify-proof.ts` was circular and accepted forgeries.** It checked the signature
 against `att.payload.server_pubkey` — the key carried *inside the attestation being
