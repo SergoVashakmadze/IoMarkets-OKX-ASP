@@ -1,9 +1,22 @@
 # Chase — expedite ASP listing review (#5774)
 
+> ## 🛑 STOP — chasing is over (Jul 16, ~21:00 UTC)
+>
+> Two attempts, two moderation actions: **Telegram restricted** the account, **Discord
+> timed it out**. Do not post in any public community channel again — a third strike
+> risks a permanent ban, which is a real cost against zero demonstrated benefit.
+> Community mods do not run the OKX.AI listing queue; the review is OKX-internal.
+>
+> **The chase has produced nothing and cost two accounts. Drop it and go do the four
+> deliverables that are actually in your control** (bridge → demo → X post → form),
+> all of which are still undone with ~26h left. If you want one more nudge, put it in
+> the **Google form's notes field** — official, unfiltered, and required anyway.
+>
+> Everything below is retained as a record. Most of it should not be sent.
+
 Copy-paste wording to nudge the **OKX AI Genesis Hackathon** organisers (HackQuest /
-OKX.AI) about our listing that is still "under review". Pick the channel version you
-have access to. Keep it polite and factual — the service is healthy; we're only
-asking them to complete the manual approval before the deadline.
+OKX.AI) about our listing that is still "under review". Keep it polite and factual —
+the service is healthy; we're only asking them to complete the manual approval.
 
 **Key facts (already verified):**
 - ASP **#5774** "IoMarkets.ai" (role: ASP) — submitted **Jul 14, ~21:37 UTC**
@@ -95,15 +108,24 @@ ASP #5774?" — a question with no link at all will pass any filter.
 
 ---
 
-## Discord — the live channel (use this next)
+## ⛔ Discord — DO NOT POST (timed out, Jul 16)
 
-**Before posting:** find the **#support / #help / #ask-organizers** channel. Do NOT
-post in #general, and do NOT cross-post to several channels — one post, one channel,
-then wait. That is exactly what went wrong on Telegram.
+**This message got the account timed out.** Do not send it. Kept only as a record of
+what not to do.
 
-**If Discord blocks the links** (some servers restrict new members): do **not** rework
-and repost. Post the message with the bullet list of URLs removed and add "happy to
-DM the endpoint URLs" — or just ask an admin first. Never retry a filtered message.
+**Why it failed — the scam signature.** In a crypto community, a new account posting
+
+> **wallet address + multiple URLs + urgency ("deadline", "expedite", "nudge")**
+
+is the textbook drainer/spam pattern, and auto-mod is tuned to catch precisely that
+combination. This message had all three. Both the Telegram hide and the Discord
+timeout have the same root cause: **the gatekeeper was an automated filter, not a
+human**, and the text was optimised for the human who never got to read it.
+
+**The rule:** public community channels are the wrong tool for chasing a listing
+review. Their mods cannot approve #5774 anyway — the review is OKX-internal. Use the
+official, unfiltered channels: the **Google form's notes field** (goes straight to the
+organisers, no auto-mod, and must be filed regardless) and **email/support ticket**.
 
 > Hi! 👋 Hoping someone can point me in the right direction — I'm entered in the OKX
 > AI Genesis Hackathon and my ASP listing is stuck in review with the deadline close.
