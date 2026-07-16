@@ -37,6 +37,20 @@ const app = express();
 // resource.url is built with https:// (OKX requires a public HTTPS endpoint).
 app.set("trust proxy", true);
 
+// Carries the proof route's to-sign payload from the handler to the settlement
+// extension within a single request's async context.
+//
+// MUST be registered BEFORE the payment middleware. The settlement extension runs
+// inside that middleware's async continuation, so if the context is only opened
+// after it, the extension sees getStore() === undefined and silently returns no
+// proof — the paid route still charges and still returns data, just with the
+// attestation missing. (Jul 16: the handler stashed `pending` correctly, but the
+// extension fired with hasStore:false, so every paid proof call ever made returned
+// a placeholder string instead of a signed attestation.)
+type ProofPending = Omit<AttestationPayload, "server_pubkey" | "chain" | "settlement_txid">;
+const proofStore = new AsyncLocalStorage<{ pending?: ProofPending }>();
+app.use((_req, _res, next) => proofStore.run({}, next));
+
 // ── x402 payment middleware (priced routes) ───────────────────────────────────
 // Only mounted when the OKX facilitator creds + receiving wallet are configured;
 // otherwise the routes serve free (useful for local dev before onboarding).
@@ -59,13 +73,21 @@ if (x402Configured()) {
   resourceServer.registerExtension({
     key: PROOF_EXT_KEY,
     async enrichSettlementResponse(_declaration, context) {
-      if (!proofConfigured()) return undefined;
+      const txid = context.result.transaction;
+      if (!proofConfigured()) {
+        console.warn("[proof] no attestation emitted: signing not configured; txid", txid);
+        return undefined;
+      }
+      // A paid call that returns no proof is a silent failure the buyer paid for —
+      // warn loudly rather than returning undefined quietly (see the note on
+      // proofStore's registration order above).
       const pending = proofStore.getStore()?.pending;
-      if (!pending) return undefined;
-      return sign(
-        { ...pending, chain: CHAIN, settlement_txid: context.result.transaction },
-        config.proofPrivateKey,
-      );
+      if (!pending) {
+        console.warn("[proof] no attestation emitted: async context missing; txid", txid);
+        return undefined;
+      }
+      console.log("[proof] signed attestation emitted for txid", txid);
+      return sign({ ...pending, chain: CHAIN, settlement_txid: txid }, config.proofPrivateKey);
     },
   });
 
@@ -95,12 +117,6 @@ if (x402Configured()) {
     "x402 NOT configured (set X402_PAY_TO + OKX_API_KEY/SECRET/PASSPHRASE) — priced routes serve FREE. Dev only.",
   );
 }
-
-// Carries the proof route's to-sign payload from the handler to the settlement
-// extension within a single request's async context.
-type ProofPending = Omit<AttestationPayload, "server_pubkey" | "chain" | "settlement_txid">;
-const proofStore = new AsyncLocalStorage<{ pending?: ProofPending }>();
-app.use((_req, _res, next) => proofStore.run({}, next));
 
 // ── DATA TIER — get_vwap ──────────────────────────────────────────────────────
 app.get(`${P}/signal/vwap`, async (req: Request, res: Response) => {
