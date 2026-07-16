@@ -53,6 +53,23 @@ fi
 echo
 
 echo "── 3. replay with the payment header → settle + get data ───────────────────"
-curl -s -D - -H "$HDR_NAME: $HDR_VAL" "$URL" | sed -n '1,40p'
+RESP="$(mktemp)"
+trap 'rm -f "$RESP"' EXIT
+curl -s -D - -H "$HDR_NAME: $HDR_VAL" "$URL" > "$RESP"
+sed -n '1,40p' "$RESP"
 echo
-echo "Done. Check the settlement tx on the X Layer explorer: https://www.okx.com/web3/explorer/xlayer"
+
+# On the proof tier the settlement response carries the ed25519 attestation under
+# extensions["iomarkets-proof"]. Save it so it can be checked independently.
+PR=$(grep -i '^payment-response:' "$RESP" | sed 's/^[Pp]ayment-[Rr]esponse:[[:space:]]*//' | tr -d '\r' || true)
+if [ -n "$PR" ]; then
+  ATT=$(echo "$PR" | base64 -d 2>/dev/null | python3 -c 'import sys,json;e=json.load(sys.stdin).get("extensions",{}).get("iomarkets-proof");print(json.dumps(e,indent=2) if e else "",end="")' 2>/dev/null || true)
+  if [ -n "$ATT" ]; then
+    echo "$ATT" > attestation.json
+    echo "── signed attestation → attestation.json ───────────────────────────────────"
+    echo "$ATT"
+    echo
+    echo "Verify it independently:  pnpm verify attestation.json"
+  fi
+fi
+echo "Settlement tx on the X Layer explorer: https://www.okx.com/web3/explorer/xlayer"
