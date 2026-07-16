@@ -52,10 +52,18 @@ cleanup() {
 trap cleanup EXIT
 
 echo "starting isolated display $DISP (your desktop is not involved)…"
-Xvfb "$DISP" -screen 0 "${W}x${H}x24" -nolisten tcp &
+# 2>/dev/null: Xvfb logs harmless amdgpu probe failures on this box.
+Xvfb "$DISP" -screen 0 "${W}x${H}x24" -nolisten tcp 2>/dev/null &
 XVFB_PID=$!
-sleep 2
-DISPLAY="$DISP" xdpyinfo >/dev/null 2>&1 || { echo "Xvfb failed to start"; exit 1; }
+# Wait for the display to actually accept connections — it can take several
+# seconds while Xvfb probes the GPU, and a fixed sleep races it.
+for i in $(seq 1 20); do
+  DISPLAY="$DISP" xdpyinfo >/dev/null 2>&1 && break
+  kill -0 "$XVFB_PID" 2>/dev/null || { echo "Xvfb died on startup"; exit 1; }
+  sleep 0.5
+done
+DISPLAY="$DISP" xdpyinfo >/dev/null 2>&1 || { echo "Xvfb never came up on $DISP"; exit 1; }
+echo "display $DISP ready"
 
 DISPLAY="$DISP" xterm -geometry 200x50+0+0 -fa "Monospace" -fs 11 \
   -bg black -fg white -e bash -c "cd '$PROJECT' && ./scripts/demo-run.sh; sleep 2" &

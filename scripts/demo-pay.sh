@@ -22,11 +22,34 @@ URL="$BASE$PATH_"
 # Load OKX creds so the onchainos CLI can auth (values never printed).
 if [ -f .env ]; then set -a; . ./.env; set +a; fi
 
+# -4 (force IPv4). okx.iomarkets.ai publishes ONLY an A record — verified against
+# 8.8.8.8 and 1.1.1.1. But a resolver doing DNS64 will synthesise an IPv6 address
+# under the NAT64 prefix 64:ff9b::/96, and if the NAT64 gateway is broken (as on the
+# dev laptop, Jul 17) Happy Eyeballs picks IPv6 ~half the time and the request dies
+# with no response at all — which reads exactly like "the server is down". It isn't:
+# the endpoint is 200 over IPv4 from everywhere, including from the server's own
+# network. Pinning IPv4 keeps the demo deterministic on any network.
+CURL="curl -4 --connect-timeout 8"
+
+# Even on IPv4 this laptop's uplink drops ~20% of connections to the endpoint
+# (curl exit 7, no response) while the same URL is 5/5 from the server's own
+# network — the local path, not the service. curl's --retry won't catch a reset,
+# so retry here. Without this a demo take dies on a coin flip.
+fetch_challenge() {
+  local i out
+  for i in 1 2 3 4 5 6; do
+    out=$($CURL -s -D - -o /dev/null "$URL" 2>/dev/null \
+      | grep -i '^payment-required:' \
+      | sed 's/^[Pp]ayment-[Rr]equired:[[:space:]]*//' | tr -d '\r' || true)
+    if [ -n "$out" ]; then printf '%s' "$out"; return 0; fi
+    sleep 1
+  done
+  return 1
+}
+
 echo "── 1. unpaid request → expect HTTP 402 ─────────────────────────────────────"
-# `|| true`: grep exits 1 when the header is absent, and under `set -euo pipefail`
-# that kills the script here — the friendly message below would never print.
-CHALLENGE=$(curl -s -D - -o /dev/null "$URL" | grep -i '^payment-required:' | sed 's/^[Pp]ayment-[Rr]equired:[[:space:]]*//' | tr -d '\r' || true)
-if [ -z "$CHALLENGE" ]; then echo "No PAYMENT-REQUIRED header — is the route priced / server up?"; exit 1; fi
+CHALLENGE=$(fetch_challenge || true)
+if [ -z "$CHALLENGE" ]; then echo "No PAYMENT-REQUIRED header after 6 tries — route priced / server up?"; exit 1; fi
 echo "402 challenge (decoded):"
 echo "$CHALLENGE" | base64 -d 2>/dev/null | (python3 -m json.tool 2>/dev/null || cat)
 PAYTO=$(echo "$CHALLENGE" | base64 -d 2>/dev/null | python3 -c 'import sys,json;print(json.load(sys.stdin)["accepts"][0]["payTo"])' 2>/dev/null || true)
@@ -55,7 +78,13 @@ echo
 echo "── 3. replay with the payment header → settle + get data ───────────────────"
 RESP="$(mktemp)"
 trap 'rm -f "$RESP"' EXIT
-curl -s -D - -H "$HDR_NAME: $HDR_VAL" "$URL" > "$RESP"
+# Retry here too: the payment authorization is already signed, so a dropped
+# connection would waste the take (nothing settles until the server sees it).
+for i in 1 2 3 4 5; do
+  $CURL -s -D - -H "$HDR_NAME: $HDR_VAL" "$URL" > "$RESP" 2>/dev/null
+  grep -qi '^HTTP/' "$RESP" && break
+  sleep 1
+done
 sed -n '1,40p' "$RESP"
 echo
 
