@@ -29,7 +29,7 @@ rejects it. Registered as ASP #5774 on OKX.AI; listing review pending.
 
 **Required:** `#OKXAI` + the demo (≤90s). **Attach `demo-90s.mp4`** (native video
 autoplays in-feed — better for Social Buzz) or link https://youtu.be/Yo-TTm6t7Yc.
-**Verify the @OKX_AI handle before posting** — if unsure, drop the @ and write it
+**Verify the @okx handle before posting** — if unsure, drop the @ and write it
 plainly. **Copy the post URL** — the submission form requires it.
 
 ## ✅ Recommended — the forgery angle
@@ -37,7 +37,7 @@ plainly. **Copy the post URL** — the submission form requires it.
 ```
 Anyone can claim a price. We sign ours.
 
-Every paid call to IoMarkets.ai on @OKX_AI returns an ed25519 attestation anchored to
+Every paid call to IoMarkets.ai on @okx returns an ed25519 attestation anchored to
 its x402 settlement tx on X Layer. Forge one and the verifier rejects it — watch it
 happen ↓
 
@@ -53,7 +53,7 @@ subscription. None of it works for an agent.
 So I built the version agents can use: pay per call in USDT0 on X Layer via x402, and
 verify every price against a published key. No API key. No account.
 
-IoMarkets.ai on @OKX_AI ↓ #OKXAI
+IoMarkets.ai on @okx ↓ #OKXAI
 ```
 
 ## Alt — the plain one
@@ -61,7 +61,7 @@ IoMarkets.ai on @OKX_AI ↓ #OKXAI
 ```
 Agents don't need API keys — they need to pay and to verify.
 
-IoMarkets.ai on @OKX_AI: pay-per-call market data + cryptographic price proofs,
+IoMarkets.ai on @okx: pay-per-call market data + cryptographic price proofs,
 settled in USDT0 on X Layer via x402.
 
 Trust no one. Verify everything. #OKXAI

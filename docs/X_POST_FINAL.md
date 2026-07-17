@@ -1,9 +1,11 @@
 # X post — final, ready to paste
 
 Demo video: **https://youtu.be/Yo-TTm6t7Yc** (`demo-90s.mp4`, 45s — satisfies the ≤90s rule)
+Handle: **@okx** (x.com/okx — confirmed by Sergo; the earlier `@OKX_AI` was my guess)
 
-> **⚠️ Set that video to PUBLIC on YouTube before posting.** It was still Private.
-> A private link shows judges nothing and the whole submission hangs on it.
+> **Unlisted is fine.** Verified with no login: HTTP 200, `status: OK`, title returns.
+> Anyone with the link can watch, judges included. Public would only add YouTube-search
+> discoverability (marginal Social Buzz upside) — not worth blocking on.
 
 ---
 
@@ -12,18 +14,28 @@ Demo video: **https://youtu.be/Yo-TTm6t7Yc** (`demo-90s.mp4`, 45s — satisfies 
 ```
 Anyone can claim a price. We sign ours.
 
-Every paid call to IoMarkets.ai on @OKX_AI returns an ed25519 attestation anchored to its x402 settlement tx on X Layer. Forge one and the verifier rejects it — watch it happen:
+Every paid call to IoMarkets.ai on @okx AI returns an ed25519 attestation anchored to its x402 settlement tx on X Layer. Forge one and the verifier rejects it — watch it happen:
 
 https://youtu.be/Yo-TTm6t7Yc
 
 Pay per call. Verify without trusting us. #OKXAI
 ```
 
+**If "@okx AI" reads awkwardly, use this instead:**
+
+```
+Anyone can claim a price. We sign ours.
+
+Every paid call to IoMarkets.ai — our ASP on OKX.AI — returns an ed25519 attestation anchored to its x402 settlement tx on X Layer. Forge one and the verifier rejects it — watch it happen:
+
+https://youtu.be/Yo-TTm6t7Yc
+
+Pay per call. Verify without trusting us. @okx #OKXAI
+```
+
 **Before you hit post:**
-- [ ] YouTube video is **Public**
 - [ ] `#OKXAI` is in there (mandatory — it's how they find your entry)
-- [ ] `@OKX_AI` handle verified. **If you can't confirm it, delete the @ and write
-      "OKX.AI"** — tagging a wrong or non-existent account looks worse than not tagging.
+- [ ] `@okx` — the one handle we've confirmed. Don't invent an OKX.AI-specific one.
 - [ ] **Copy the post URL** → the submission form requires it (`X Participation Post (Link)`)
 
 ---
@@ -55,9 +67,9 @@ I spent years building market data for humans at Bloomberg. A terminal, a login,
 
 So I built the version agents can use: pay per call in USDT0 on X Layer via x402, verify every price against a published key. No API key. No account.
 
-IoMarkets.ai on @OKX_AI — demo: https://youtu.be/Yo-TTm6t7Yc
+IoMarkets.ai — our ASP on OKX.AI. Demo: https://youtu.be/Yo-TTm6t7Yc
 
-#OKXAI
+@okx #OKXAI
 ```
 
 Both work. The forgery angle is stronger for **Creative Genius**; the Bloomberg angle

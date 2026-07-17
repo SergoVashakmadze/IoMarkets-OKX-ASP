@@ -7,14 +7,14 @@ demo/walkthrough (**≤90 seconds**), then link the post in the Google form.
 > regardless, and neither depends on the listing. Waiting for approval risks having
 > nothing filed at all.
 >
-> **Handles are unverified** — confirm `@OKX_AI` and your own handle before posting.
+> **Handles are unverified** — confirm `@okx` and your own handle before posting.
 > Do NOT invent a handle; if unsure, drop the @ and write the name in plain text.
 
 ---
 
 ## Primary (with the video)
 
-> My ASP **IoMarkets.ai** is live on **@OKX_AI** 🟢
+> My ASP **IoMarkets.ai** is live on **@okx** 🟢
 >
 > Autonomous agents pay **per call in USDT0 on X Layer** (x402) and get back
 > **verifiable** market truth — an ed25519-signed price proof anchored to the
@@ -28,7 +28,7 @@ demo/walkthrough (**≤90 seconds**), then link the post in the Google form.
 
 > Agents don't need API keys — they need to **pay** and to **verify**.
 >
-> **IoMarkets.ai** on **@OKX_AI**: pay-per-call market data + cryptographic price
+> **IoMarkets.ai** on **@okx**: pay-per-call market data + cryptographic price
 > proofs, settled in USDT0 on X Layer via x402.
 >
 > Trust no one. Verify everything. #OKXAI
@@ -37,7 +37,7 @@ demo/walkthrough (**≤90 seconds**), then link the post in the Google form.
 
 > Anyone can *claim* a price. We sign ours.
 >
-> Every paid call to **IoMarkets.ai** on **@OKX_AI** returns an ed25519 attestation
+> Every paid call to **IoMarkets.ai** on **@okx** returns an ed25519 attestation
 > anchored to its x402 settlement tx on X Layer. Forge one and the verifier rejects
 > it — watch it happen ↓
 >

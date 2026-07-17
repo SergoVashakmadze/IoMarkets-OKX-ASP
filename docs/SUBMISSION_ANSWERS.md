@@ -275,13 +275,13 @@ Docker + Caddy on Hetzner · https://okx.iomarkets.ai
 # 3. X post (required: #OKXAI + demo ≤90s)
 
 **Attach `demo-90s.mp4` directly** (native video autoplays in-feed — better for Social
-Buzz) and/or link the YouTube URL. **Verify the @OKX_AI handle before posting**; if
+Buzz) and/or link the YouTube URL. **Verify the @okx handle before posting**; if
 unsure, drop the @ and write it plainly. **Save the post URL — the form needs it.**
 
 ```
 Anyone can claim a price. We sign ours.
 
-Every paid call to IoMarkets.ai on @OKX_AI returns an ed25519 attestation anchored to
+Every paid call to IoMarkets.ai on @okx returns an ed25519 attestation anchored to
 its x402 settlement tx on X Layer. Forge one and the verifier rejects it — watch it
 happen ↓
 
