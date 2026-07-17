@@ -127,7 +127,40 @@ seller ASP, verifiable on-chain.
 **Tracks** — primary **Finance Copilot**; also **Creative Genius** (signed proofs),
 **Revenue Rocket** (real per-call micro-payments), **Best Product**.
 
-**Tech stack**
+### Project Setup page (hackquest.io/projects/setup/…)
+
+**Sector:** **AI** + **Infra**. (AI = agent-native, matches the Finance Copilot track;
+Infra = a paid data/settlement rail agents build on, not an end-user app. Add **DeFi**
+only if 3 picks are allowed — defensible via stablecoin settlement + market data, but
+it isn't a DeFi protocol and a wrong tag routes you to the wrong judges.)
+
+**Tech Tag (max 8)** — presets: `Node`, `Web3`. Then **+ Add New** ×6:
+```
+TypeScript
+x402
+X Layer
+USDT0
+ed25519
+MCP
+```
+> **Do NOT tick Ethers / Python / Solidity / React / Next / Vue** — not used. Verified
+> against package.json: `@okxweb3/x402-core|evm|express`, `@noble/ed25519`,
+> `@noble/hashes`, `@questdb/nodejs-client`, `express`, `pg`, `ws`, `tsx`, `typescript`.
+> A judge who opens the repo and finds a tag you don't use is a bad first impression.
+
+**MVP Link:** `https://okx.iomarkets.ai`
+
+**Project Link:** `https://github.com/SergoVashakmadze/IoMarkets-OKX-ASP`
+
+**X (Twitter) Link:** your own handle (username only) — **use the account that posts
+the #OKXAI video**, so the entry and the post match.
+
+**Wallet → Connect Wallet:** connect **MetaMask** (`0x4580…22376`). It's for prize
+payout and it's the wallet that can do a browser wallet-connect handshake. The Agentic
+Wallet accounts (`0x015bfbe8…` ASP, `0x0b2a11d4…` buyer) are TEE-backed and driven via
+the `onchainos` CLI — they **cannot** connect in a browser. Don't try.
+
+**Full tech stack (for any free-text stack field)**
 ```
 TypeScript · Node · Express · @okxweb3/x402-core|evm|express (x402 v2, scheme: exact)
 X Layer (eip155:196) · USDT0 · EIP-3009 via OKX Agentic Wallet (TEE) · OKX facilitator
