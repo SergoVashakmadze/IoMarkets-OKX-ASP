@@ -48,6 +48,6 @@ _Roadmap (add to same ASP later): `get_imbalance` ($0.003), `get_candles` ($0.00
 
 ## Step 3 — X post (#OKXAI)
 
-> My ASP @IoMarkets is live on @OKX_AI: autonomous agents pay per call in USDT0 on X Layer and get back **verifiable** market truth — an ed25519-signed price proof anchored to the settlement tx. No API keys, no accounts, just x402. Demo ↓ #OKXAI
+> My ASP @IoMarkets is live on @okx: autonomous agents pay per call in USDT0 on X Layer and get back **verifiable** market truth — an ed25519-signed price proof anchored to the settlement tx. No API keys, no accounts, just x402. Demo ↓ #OKXAI
 
 Pair with a ≤90s screen recording: the agent firing paid calls + the settlement tx on the X Layer explorer.

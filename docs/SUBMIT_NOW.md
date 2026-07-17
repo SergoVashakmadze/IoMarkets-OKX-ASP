@@ -35,7 +35,7 @@ Post copy: **`docs/X_POST.md`**. Recommended version:
 
 > Anyone can *claim* a price. We sign ours.
 >
-> Every paid call to **IoMarkets.ai** on **@OKX_AI** returns an ed25519 attestation
+> Every paid call to **IoMarkets.ai** on **@okx** returns an ed25519 attestation
 > anchored to its x402 settlement tx on X Layer. Forge one and the verifier rejects
 > it — watch it happen ↓
 >
@@ -43,7 +43,7 @@ Post copy: **`docs/X_POST.md`**. Recommended version:
 
 - Attach `demo-90s.mp4`
 - **`#OKXAI` is mandatory** (hackathon requirement)
-- **Verify the `@OKX_AI` handle first.** If unsure, drop the @ and write it plainly.
+- **Verify the `@okx` handle first.** If unsure, drop the @ and write it plainly.
 - **Do NOT write "live on OKX.AI"** — say "ASP #5774 on OKX.AI". Registered ≠ listed.
 - **Copy the post URL** — the form needs it.
 

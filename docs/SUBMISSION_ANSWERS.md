@@ -70,7 +70,7 @@ Built for the OKX.AI Genesis Hackathon.
 - Thumbnail: skip / Auto-generated
 - Playlists: none
 - Audience: **No, it's not made for kids**
-- **Visibility: PUBLIC** ← private/unlisted = judges can't watch = submission dead
+- **Visibility:** **Unlisted is fine** (verified: the link resolves with no login, HTTP 200). Public only adds YouTube-search discoverability. **Private is NOT ok.**
 
 ---
 

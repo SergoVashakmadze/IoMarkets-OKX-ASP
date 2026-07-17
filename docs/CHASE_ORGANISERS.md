@@ -155,7 +155,7 @@ routed to the OKX.AI reviewers rather than stuck with community mods.
 ## Where to send it
 
 - **HackQuest hackathon page / Discord:** https://www.hackquest.io/hackathons/OKXAI-Genesis-Hackathon (look for the event Discord/Telegram + a "support" or "help" channel)
-- **X:** post/DM referencing **#OKXAI** and tag **@OKX_AI**
+- **X:** post/DM referencing **#OKXAI** and tag **@okx**
 - **Google form:** if it has a comments/notes field, paste the longer version there too when you submit
 
 > **Status as of Jul 16, 20:51 UTC: send now** — review is at ~47h against an

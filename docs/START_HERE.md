@@ -7,7 +7,7 @@
 
 ## The only 3 things left
 
-1. **YouTube → set Visibility to PUBLIC** (it was Private — a private video is an
+1. **YouTube — unlisted is fine** (verified: resolves with no login). Private is not.
    invisible submission).
 2. **Post on X** with **#OKXAI** + the demo → **copy the post URL**.
 3. **HackQuest → Submit** using [`FINAL_SUBMISSION_FORM.md`](FINAL_SUBMISSION_FORM.md).

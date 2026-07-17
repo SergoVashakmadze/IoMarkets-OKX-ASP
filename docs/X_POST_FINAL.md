@@ -14,24 +14,16 @@ Handle: **@okx** (x.com/okx — confirmed by Sergo; the earlier `@OKX_AI` was my
 ```
 Anyone can claim a price. We sign ours.
 
-Every paid call to IoMarkets.ai on @okx AI returns an ed25519 attestation anchored to its x402 settlement tx on X Layer. Forge one and the verifier rejects it — watch it happen:
-
-https://youtu.be/Yo-TTm6t7Yc
-
-Pay per call. Verify without trusting us. #OKXAI
-```
-
-**If "@okx AI" reads awkwardly, use this instead:**
-
-```
-Anyone can claim a price. We sign ours.
-
 Every paid call to IoMarkets.ai — our ASP on OKX.AI — returns an ed25519 attestation anchored to its x402 settlement tx on X Layer. Forge one and the verifier rejects it — watch it happen:
 
 https://youtu.be/Yo-TTm6t7Yc
 
 Pay per call. Verify without trusting us. @okx #OKXAI
 ```
+
+> `@okx` sits at the end as a tag rather than mid-sentence — "our ASP on **@okx**"
+> would read as if the product lives on the exchange, not on OKX.AI. Tag, don't
+> substitute the name.
 
 **Before you hit post:**
 - [ ] `#OKXAI` is in there (mandatory — it's how they find your entry)
