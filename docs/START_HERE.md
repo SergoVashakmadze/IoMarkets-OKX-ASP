@@ -7,9 +7,10 @@
 
 ## The only 3 things left
 
-1. **YouTube — unlisted is fine** (verified: resolves with no login). Private is not.
-   invisible submission).
-2. **Post on X** with **#OKXAI** + the demo → **copy the post URL**.
+1. ~~YouTube visibility~~ — **done. Unlisted is fine**, verified: the link resolves
+   with no login (HTTP 200). Judges can watch. Nothing to change.
+2. **Post on X** with **#OKXAI** + the demo link → **copy the post URL**.
+   Copy: [`X_POST_FINAL.md`](X_POST_FINAL.md). Handle is **@okx**.
 3. **HackQuest → Submit** using [`FINAL_SUBMISSION_FORM.md`](FINAL_SUBMISSION_FORM.md).
 
 > The X post gates everything: `X Participation Post (Link)` is a required field on the

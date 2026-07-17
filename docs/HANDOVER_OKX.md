@@ -27,7 +27,7 @@ before — see below).
    Switch to Account 2 first (`onchainos wallet switch f8234c27-…`), or `demo-pay.sh`
    hard-stops. **Switch back to Account 1 afterwards** or #5774 lookups break.
    Strongest beat: show a forged attestation getting `PROOF REJECTED`.
-2. **Post on X** with **#OKXAI**, tagging @OKX_AI. Required regardless.
+2. **Post on X** with **#OKXAI**, tagging @okx. Required regardless.
 3. **File the Google form** before **Jul 17 23:59 UTC**. Required regardless. Its
    notes field is also the only sane channel left for nudging the listing.
 4. **#5774 is still queued** — out of our hands. **DO NOT CHASE ON DISCORD/TELEGRAM**
@@ -156,7 +156,7 @@ expected value at real cost.
 **Legitimate channels, all still unused:** the **Google form's notes field**
 (unfiltered, straight to organisers, required anyway — best option), **email/support
 ticket** (long version in [`CHASE_ORGANISERS.md`](CHASE_ORGANISERS.md), never sent),
-and the **required #OKXAI X post** tagging @OKX_AI (a deliverable you owe regardless,
+and the **required #OKXAI X post** tagging @okx (a deliverable you owe regardless,
 links fine, and shipping beats pleading).
 
 ### New docs / tooling (Jul 15–16)
