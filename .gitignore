@@ -13,3 +13,6 @@ skills-lock.json
 attestation.json
 forged.json
 *.mp4
+
+# generated from demo-90s.mp4 by ffmpeg — see docs/SUBMISSION_ANSWERS.md
+submission-images/

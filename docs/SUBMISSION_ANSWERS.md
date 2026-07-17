@@ -160,6 +160,108 @@ payout and it's the wallet that can do a browser wallet-connect handshake. The A
 Wallet accounts (`0x015bfbe8…` ASP, `0x0b2a11d4…` buyer) are TEE-backed and driven via
 the `onchainos` CLI — they **cannot** connect in a browser. Don't try.
 
+### Images (up to 4 — 500x300 or 1280x720)
+
+**Ready to upload** — generated from the demo, all **1280x720**, in `submission-images/`:
+
+| File | Shows |
+|---|---|
+| `01-402-challenge.jpg` | title banner + the decoded HTTP 402 x402 challenge |
+| `02-agent-pays.jpg` | wallet signs EIP-3009 → HTTP 200 + live VWAP |
+| `03-proof-accepted.jpg` | published pubkey + **PROOF ACCEPTED** |
+| `04-forgery-rejected.jpg` | **PROOF ACCEPTED** and forged proof **PROOF REJECTED** |
+
+> Upload `04` first if only one is shown as the cover — the forgery rejection is the
+> differentiator. Regenerate any time:
+> `ffmpeg -ss <t> -i demo-90s.mp4 -frames:v 1 -vf "scale=1280:-1:flags=lanczos,crop=1280:720:0:0" out.jpg`
+
+### Description
+
+```
+Agent-native market data with cryptographic receipts. Agents pay per call via x402
+($0.002 for a VWAP signal, $0.01 for a signed price proof) in USDT0 on X Layer — no
+API key, no account, no invoice, gasless for the payer. Every premium call returns an
+ed25519-signed price attestation anchored to the on-chain settlement tx that paid for
+it, independently verifiable against our published key. Forge one and the verifier
+rejects it. Registered as ASP #5774 on OKX.AI; listing review pending.
+```
+
+### Progress During Hackathon
+
+```
+Built end-to-end during the hackathon:
+
+• Live ASP at https://okx.iomarkets.ai — Docker + Caddy, HTTPS, health green
+• x402 v2 paid routes via the OKX SDK: get_vwap ($0.002), get_price_proof ($0.01),
+  settling USDT0 on X Layer (eip155:196) through the OKX facilitator
+• Market data from QuestDB fed by a live OKX trade-feed ingester (auto-reconnecting)
+• The differentiator: ed25519 price attestations anchored to the settlement txid,
+  plus a published trust anchor at /v1/proof/pubkey and an MCP manifest that
+  advertises it so agents can pin the key before paying
+• A standalone verifier (pnpm verify) that pins the published key — it ACCEPTS a real
+  attestation and REJECTS a forgery signed with any other key
+• Registered on-chain as ASP #5774 and submitted for listing (review pending)
+• Real money, not a testnet: a buyer agent pays the seller ASP per call in USDT0,
+  settled on X Layer, verifiable on the explorer
+
+Two things we found and fixed by testing rather than assuming:
+• The verifier originally checked signatures against the pubkey embedded in the
+  payload — circular, and it accepted a forgery claiming BTC = $1. It now pins the
+  independently published key.
+• The paid proof tier never actually emitted a proof: the settlement extension read an
+  AsyncLocalStorage context opened after the payment middleware, so it silently
+  returned nothing. Buyers paid and got a placeholder. Fixed and verified live.
+```
+
+### Fundraising Status
+
+```
+Bootstrapped — no external funding.
+```
+
+### Active Hackathon
+
+```
+OKX.AI Genesis Hackathon
+```
+
+### Deployment Details (confidential — judges only)
+
+**Ecosystem Deployed:** **X Layer** (if absent from the dropdown, pick `Other` and say
+"X Layer (OKX L2), eip155:196")
+
+**Testnet/Mainnet:** **Mainnet**
+
+**Contract address & deployed link:**
+```
+Deployed service (the product):  https://okx.iomarkets.ai
+  /health                        -> {"ok":true,"questdb":true,"proof":true,"x402":true}
+  /v1/signal/vwap    $0.002      -> HTTP 402 x402 challenge
+  /v1/proof/price    $0.01       -> HTTP 402; on payment returns a signed attestation
+  /v1/proof/pubkey               -> ed25519 trust anchor (public)
+  /mcp/tools                     -> MCP manifest
+
+We deployed NO custom contract. This is an x402 HTTP service: payments are EIP-3009
+authorisations settled by the OKX facilitator in an existing token.
+
+Network:            X Layer mainnet, eip155:196
+Settlement token:   USDT0  0x779ded0c9e1022225f8e0630b35a9b54be713736
+Seller / payTo (ASP #5774 wallet):  0x015bfbe816635b173e924688fba8794e30031266
+Buyer agent wallet:                 0x0b2a11d49c2cd72791987d0bc2203729733fdba0
+
+Example settlement tx (buyer -> ASP, 0.002 USDT0, X Layer):
+  0x10d73229f4067bcb6eb8d2069c04c781fe7d3f799887df2ced804fc25085656b
+
+Example paid proof-tier settlement, anchored inside the attestation:
+  0x3b39c153b838ecf8a673dac2ab4b43bfdab0ac372fa2c15458b0441934618b27
+
+Proof public key (pin this to verify any attestation):
+  a95fc43400976d6f324427765987cd8676e69fddaf0a49b57d309d4db2743cf4
+
+Explorer: https://www.okx.com/web3/explorer/xlayer
+Source:   https://github.com/SergoVashakmadze/IoMarkets-OKX-ASP
+```
+
 **Full tech stack (for any free-text stack field)**
 ```
 TypeScript · Node · Express · @okxweb3/x402-core|evm|express (x402 v2, scheme: exact)
