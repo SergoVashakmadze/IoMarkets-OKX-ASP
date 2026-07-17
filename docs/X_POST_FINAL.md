@@ -1,83 +1,94 @@
-# X post — final, ready to paste
+# X post — FINAL, fits 280 chars
 
-Demo video: **https://youtu.be/Yo-TTm6t7Yc** (`demo-90s.mp4`, 45s — satisfies the ≤90s rule)
-Handle: **@okx** (x.com/okx — confirmed by Sergo; the earlier `@OKX_AI` was my guess)
+Demo: **https://youtu.be/Yo-TTm6t7Yc** (45s, unlisted — **verified reachable with no
+login**, HTTP 200. Judges can watch. No need to make it Public.)
+Handle: **@okx** (confirmed).
 
-> **Unlisted is fine.** Verified with no login: HTTP 200, `status: OK`, title returns.
-> Anyone with the link can watch, judges included. Public would only add YouTube-search
-> discoverability (marginal Social Buzz upside) — not worth blocking on.
+> **X counts a URL as 23 characters** no matter its real length. All versions below
+> are measured with that rule and fit the **280** free limit.
 
 ---
 
-## THE POST — copy everything in this block
+## ✅ POST THIS — Bloomberg + forgery beat (276/280)
+
+```
+I worked at Bloomberg. Market data there is built for humans — a terminal, a login, a subscription. None of it works for an agent.
+
+IoMarkets.ai on OKX.AI: agents pay per call, and every price comes back signed. Forge one, it's rejected ↓
+
+https://youtu.be/Yo-TTm6t7Yc
+
+@okx #OKXAI
+```
+
+## Alt — product-only, no CV claim (278/280)
 
 ```
 Anyone can claim a price. We sign ours.
 
-Every paid call to IoMarkets.ai — our ASP on OKX.AI — returns an ed25519 attestation anchored to its x402 settlement tx on X Layer. Forge one and the verifier rejects it — watch it happen:
+Every paid call to IoMarkets.ai returns an ed25519 attestation anchored to its x402 settlement tx on X Layer. Forge one and the verifier rejects it — watch ↓
 
 https://youtu.be/Yo-TTm6t7Yc
 
 Pay per call. Verify without trusting us. @okx #OKXAI
 ```
 
-> `@okx` sits at the end as a tag rather than mid-sentence — "our ASP on **@okx**"
-> would read as if the product lives on the exchange, not on OKX.AI. Tag, don't
-> substitute the name.
-
-**Before you hit post:**
-- [ ] `#OKXAI` is in there (mandatory — it's how they find your entry)
-- [ ] `@okx` — the one handle we've confirmed. Don't invent an OKX.AI-specific one.
-- [ ] **Copy the post URL** → the submission form requires it (`X Participation Post (Link)`)
-
----
-
-## Thread reply 2 (optional, post right after)
+## Alt — Bloomberg, no forgery (278/280)
 
 ```
-Every premium call returns a signed attestation + its on-chain settlement txid.
+Market data is built for humans: a terminal, a login, a subscription. I worked at Bloomberg — none of it works for an agent.
 
-Check the signature against okx.iomarkets.ai/v1/proof/pubkey, confirm the tx on the X Layer explorer. The proof needs zero trust in us.
+IoMarkets.ai on OKX.AI: agents pay per call in USDT0 on X Layer, and verify every price against a published key.
 
-That's the product.
-```
-
-## Thread reply 3 (optional — the economics)
-
-```
-Real money, not a testnet. A buyer agent (0x0b2a11d4…) pays the ASP (0x015bfbe8…) $0.002–$0.01 in USDT0 per call, gaslessly, settled on X Layer. Micro-payments an agent can actually afford.
-```
-
----
-
-## Alternative main post — Bloomberg angle
-
-Use this instead if you'd rather lead with credibility than with the product:
-
-```
-I spent years building market data for humans at Bloomberg. A terminal, a login, a subscription. None of it works for an agent.
-
-So I built the version agents can use: pay per call in USDT0 on X Layer via x402, verify every price against a published key. No API key. No account.
-
-IoMarkets.ai — our ASP on OKX.AI. Demo: https://youtu.be/Yo-TTm6t7Yc
+↓ https://youtu.be/Yo-TTm6t7Yc
 
 @okx #OKXAI
 ```
 
-Both work. The forgery angle is stronger for **Creative Genius**; the Bloomberg angle
-is stronger for **Social Buzz** with your following, because it opens with a story
-rather than a claim.
+---
+
+## ⚠️ What I removed, and why you should care
+
+The earlier draft opened:
+
+> ~~"I spent years building market data for humans at Bloomberg."~~
+
+**I invented that.** Your profile says you *worked at* Bloomberg L.P., The World Bank
+and Colliers International — it says nothing about your **role** or **how long**. I
+turned "worked at Bloomberg" into "spent years building market data" because it read
+better. That's a specific, checkable claim about your own CV, posted publicly, tagging
+@okx, to 23K followers, about a real company full of real ex-colleagues.
+
+Every version above claims only **"I worked at Bloomberg"** — which your own profile
+supports.
+
+**If you did spend years building market data there, put it back** — it's the stronger
+line and it's yours to make. Just don't let me make it for you.
 
 ---
 
-## 🚫 Never in this post
+## Before you post
 
-- ❌ **"live on OKX.AI" / "listed" / "approved"** — #5774 is **registered, review
-  pending**. It's checkable, and getting caught overclaiming is worse than a pending queue.
-- ❌ Users, revenue, traction — there are none.
+- [ ] `#OKXAI` present — mandatory, it's how they find your entry
+- [ ] `@okx` — the confirmed handle (`@OKX_AI` was my guess; it's wrong)
+- [ ] Under 280 — all versions above are
+- [ ] Nothing says **live / listed / approved** — #5774 is registered, review pending
+- [ ] **Copy the post URL** → `X Participation Post (Link)` on the submission form
 
-## Optional: attach the file too
+## Optional thread replies (post after, each fits 280)
+
+```
+Every premium call returns a signed attestation + its settlement txid.
+
+Check the signature against okx.iomarkets.ai/v1/proof/pubkey, confirm the tx on the X Layer explorer. The proof needs zero trust in us.
+```
+
+```
+Real money, not a testnet. A buyer agent pays the ASP $0.002–$0.01 in USDT0 per call, gaslessly, settled on X Layer. Micro-payments an agent can actually afford.
+```
+
+## Optional: attach the file
 
 Attaching `demo-90s.mp4` (project root) as native video autoplays in-feed and reaches
-further than a link — worth it for the **Social Buzz** track ($10K, 10 winners). The
-YouTube link alone satisfies the requirement, so only do this if you have the energy.
+further than a link — worth it for **Social Buzz** ($10K, 10 winners). The link alone
+already satisfies the requirement.
