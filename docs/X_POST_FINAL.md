@@ -4,12 +4,37 @@ Demo: **https://youtu.be/Yo-TTm6t7Yc** (45s, unlisted — **verified reachable w
 login**, HTTP 200. Judges can watch. No need to make it Public.)
 Handle: **@okx** (confirmed).
 
-> **X counts a URL as 23 characters** no matter its real length. All versions below
-> are measured with that rule and fit the **280** free limit.
+> **How X actually counts:** a URL always bills as **23** chars regardless of length,
+> and characters outside the basic ranges — **arrows (↓), emoji** — bill as **2**, not 1.
+> Counts below use X's real weighted rule (twitter-text), not `len()`.
 
 ---
 
-## ✅ POST THIS — Bloomberg + forgery beat (276/280)
+## ✅ POST THIS — 249/280 (31 spare)
+
+```
+I worked at Bloomberg. Market data there is built for humans: a terminal, a login, a subscription. None of it works for an agent.
+
+IoMarkets.ai on OKX.AI — agents pay per call, and every price comes back signed.
+
+https://youtu.be/Yo-TTm6t7Yc
+
+@okx #OKXAI
+```
+
+## Shortest — 239/280 (41 spare)
+
+```
+Market data is built for humans: a terminal, a login, a subscription. I worked at Bloomberg — none of it works for an agent.
+
+IoMarkets.ai on OKX.AI: agents pay per call. Every price comes back signed.
+
+https://youtu.be/Yo-TTm6t7Yc
+
+@okx #OKXAI
+```
+
+## Keeps the forgery beat — 277/280 ⚠️ only 3 spare
 
 ```
 I worked at Bloomberg. Market data there is built for humans — a terminal, a login, a subscription. None of it works for an agent.
@@ -20,6 +45,9 @@ https://youtu.be/Yo-TTm6t7Yc
 
 @okx #OKXAI
 ```
+> Fits, but one stray keystroke tips it over — and the `↓` alone costs 2. Use the top
+> version unless you specifically want the forgery line in the post itself. The demo
+> shows the forgery anyway.
 
 ## Alt — product-only, no CV claim (278/280)
 
