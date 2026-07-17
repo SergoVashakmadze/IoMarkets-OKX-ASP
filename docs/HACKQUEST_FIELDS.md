@@ -173,53 +173,63 @@ Rocket** (real per-call micro-payments), **Best Product**.
 
 # Checkpoints tab
 
-### Checkpoint 1 — Live ASP, paid routes behind HTTP 402 · Jul 14
-```
-Deployed the service at https://okx.iomarkets.ai (Docker + Caddy + HTTPS, health
-green). Two priced routes live behind real x402 v2 challenges: get_vwap ($0.002) and
-get_price_proof ($0.01), scheme "exact", network X Layer eip155:196, settling in
-USDT0 via the OKX facilitator. Market data comes from QuestDB fed by a live
-auto-reconnecting OKX trade-feed ingester — real prices, not fixtures.
-```
+Dialog fields: **Type** (Testing / Launch / Other) · **Title** (max **50**) ·
+**Description** (max **200**) · **Link** · **Image** (up to 3, 500x300 or 1280x720).
 
-### Checkpoint 2 — Registered as ASP #5774 on OKX.AI · Jul 14
-```
-Registered the agent on-chain as ASP #5774 "IoMarkets.ai" and submitted it for
-marketplace listing. Published an MCP manifest at /mcp/tools so agents can discover
-the tools — and the trust anchor — before paying. Listing review is still pending at
-time of writing.
-```
+> Everything below is written to fit those limits. Add all four; #4 is the one that
+> earns credit. Images are in `submission-images/`.
 
-### Checkpoint 3 — Verifiable price proofs + published trust anchor · Jul 15–16
+### Checkpoint 1 · type: **Launch**
+**Title** (46)
 ```
-Shipped the differentiator: every paid proof call returns an ed25519-signed price
-attestation anchored to the on-chain settlement tx that paid for it. Published the
-public key at /v1/proof/pubkey (and /.well-known/okx-proof/pubkey.json) so any third
-party can pin it and verify offline, with the MCP manifest advertising it as the
-trust anchor. Built a standalone verifier (pnpm verify) that needs no trust in us.
+Live ASP: pay-per-call market data behind HTTP 402
 ```
-
-### Checkpoint 4 — Real paid calls on X Layer + two bugs found by testing · Jul 16–17
+**Description** (183)
 ```
-Funded a separate buyer-agent wallet and ran the full loop end-to-end with real money:
-buyer 0x0b2a11d4… pays seller ASP 0x015bfbe8… per call in USDT0, settled on X Layer,
-verifiable on the explorer.
-
-Testing the trust model rather than assuming it caught two real bugs:
-• The verifier checked signatures against the pubkey embedded in the payload —
-  circular. It accepted a forgery claiming BTC = $1. It now pins the independently
-  published key, and the forgery is rejected.
-• The paid proof tier had never actually emitted a proof: the settlement extension
-  read an AsyncLocalStorage context opened after the payment middleware, so it
-  silently returned nothing while still charging. Fixed and verified live.
-
-Recorded a 45s demo showing the 402, the payment, a real proof accepted, and a forged
-one rejected.
+Deployed okx.iomarkets.ai. get_vwap ($0.002) and get_price_proof ($0.01) sit behind real x402 challenges, settling USDT0 on X Layer. Prices come from QuestDB fed by a live OKX trade feed.
 ```
+**Link** `https://okx.iomarkets.ai`
+**Image** `01-402-challenge.jpg`
 
-> Checkpoint 4 is the one that earns credit: it says we tried to break our own trust
-> model and it broke — then fixed it on production, with receipts a judge can check in
-> the git log. Most checkpoints read "built it, it works".
+### Checkpoint 2 · type: **Launch**
+**Title** (33)
+```
+Registered as ASP #5774 on OKX.AI
+```
+**Description** (178)
+```
+Registered on-chain as ASP #5774 and submitted for listing (review pending). The MCP manifest at /mcp/tools lets agents discover our tools and trust anchor before paying anything.
+```
+**Link** `https://okx.iomarkets.ai/mcp/tools`
+**Image** `02-agent-pays.jpg`
+
+### Checkpoint 3 · type: **Launch**
+**Title** (43)
+```
+Signed price proofs + published trust anchor
+```
+**Description** (180)
+```
+Every paid proof call returns an ed25519 attestation anchored to its on-chain settlement tx. The public key is published at /v1/proof/pubkey, so anyone can pin it and verify offline.
+```
+**Link** `https://okx.iomarkets.ai/v1/proof/pubkey`
+**Image** `03-proof-accepted.jpg`
+
+### Checkpoint 4 · type: **Testing**  ← the important one
+**Title** (41)
+```
+Real paid calls, and we forged our own proof
+```
+**Description** (188)
+```
+Buyer agent pays the ASP per call in USDT0 on X Layer. Testing our own trust model caught 2 bugs: the verifier accepted forgeries, and the proof tier never emitted a proof. Both fixed live.
+```
+**Link** `https://youtu.be/Yo-TTm6t7Yc`
+**Image** `04-forgery-rejected.jpg`
+
+> Why #4 matters: most checkpoints read "built it, it works". Yours says we attacked
+> our own trust model, it failed, and we fixed it on production — verifiable in the
+> git log and visible in the demo.
 
 ---
 
