@@ -171,6 +171,58 @@ Rocket** (real per-call micro-payments), **Best Product**.
 
 ---
 
+# Checkpoints tab
+
+### Checkpoint 1 — Live ASP, paid routes behind HTTP 402 · Jul 14
+```
+Deployed the service at https://okx.iomarkets.ai (Docker + Caddy + HTTPS, health
+green). Two priced routes live behind real x402 v2 challenges: get_vwap ($0.002) and
+get_price_proof ($0.01), scheme "exact", network X Layer eip155:196, settling in
+USDT0 via the OKX facilitator. Market data comes from QuestDB fed by a live
+auto-reconnecting OKX trade-feed ingester — real prices, not fixtures.
+```
+
+### Checkpoint 2 — Registered as ASP #5774 on OKX.AI · Jul 14
+```
+Registered the agent on-chain as ASP #5774 "IoMarkets.ai" and submitted it for
+marketplace listing. Published an MCP manifest at /mcp/tools so agents can discover
+the tools — and the trust anchor — before paying. Listing review is still pending at
+time of writing.
+```
+
+### Checkpoint 3 — Verifiable price proofs + published trust anchor · Jul 15–16
+```
+Shipped the differentiator: every paid proof call returns an ed25519-signed price
+attestation anchored to the on-chain settlement tx that paid for it. Published the
+public key at /v1/proof/pubkey (and /.well-known/okx-proof/pubkey.json) so any third
+party can pin it and verify offline, with the MCP manifest advertising it as the
+trust anchor. Built a standalone verifier (pnpm verify) that needs no trust in us.
+```
+
+### Checkpoint 4 — Real paid calls on X Layer + two bugs found by testing · Jul 16–17
+```
+Funded a separate buyer-agent wallet and ran the full loop end-to-end with real money:
+buyer 0x0b2a11d4… pays seller ASP 0x015bfbe8… per call in USDT0, settled on X Layer,
+verifiable on the explorer.
+
+Testing the trust model rather than assuming it caught two real bugs:
+• The verifier checked signatures against the pubkey embedded in the payload —
+  circular. It accepted a forgery claiming BTC = $1. It now pins the independently
+  published key, and the forgery is rejected.
+• The paid proof tier had never actually emitted a proof: the settlement extension
+  read an AsyncLocalStorage context opened after the payment middleware, so it
+  silently returned nothing while still charging. Fixed and verified live.
+
+Recorded a 45s demo showing the 402, the payment, a real proof accepted, and a forged
+one rejected.
+```
+
+> Checkpoint 4 is the one that earns credit: it says we tried to break our own trust
+> model and it broke — then fixed it on production, with receipts a judge can check in
+> the git log. Most checkpoints read "built it, it works".
+
+---
+
 ## 🚫 The rule for every field
 **#5774 is registered, NOT listed** — review pending. Never write *live* / *listed* /
 *approved* on the marketplace, and claim no traction numbers. It's checkable.
