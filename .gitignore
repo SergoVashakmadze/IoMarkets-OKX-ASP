@@ -17,3 +17,6 @@ forged.json
 # generated from demo-90s.mp4 by ffmpeg — see docs/SUBMISSION_ANSWERS.md
 submission-images/
 pitch-slides/
+
+# Local-only audit notes (balances, personal wallets) — never commit
+docs/*.local.md
