@@ -60,7 +60,7 @@ MVP Link         https://okx.iomarkets.ai
 Project Link     https://github.com/SergoVashakmadze/IoMarkets-OKX-ASP
 Demo             https://youtu.be/Yo-TTm6t7Yc
 Proof key        https://okx.iomarkets.ai/v1/proof/pubkey
-Wallet           connect MetaMask (0x4580…22376) — NOT the Agentic Wallet
+Wallet           connect personal MetaMask — NOT the Agentic Wallet
 ```
 
 **ASP Description** (292/300)
@@ -80,7 +80,7 @@ Solo founder, ex-Bloomberg and World Bank — I built market data for humans the
 - Live: `https://okx.iomarkets.ai` — health green, `get_vwap` $0.002, `get_price_proof` $0.01
 - Real paid calls settling USDT0 on X Layer: buyer `0x0b2a11d4…` → ASP `0x015bfbe8…`
 - Signed proofs work; forgeries rejected (`pnpm verify`)
-- Buyer wallet holds ~24.9 USDT0 (~12,000 more calls)
+- Buyer wallet funded for thousands more calls
 - **#5774: still "Listing under review" / not listed** — out of our hands
 
 ## Background / ops docs

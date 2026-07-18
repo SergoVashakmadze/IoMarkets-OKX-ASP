@@ -155,7 +155,7 @@ MCP
 **X (Twitter) Link:** your own handle (username only) — **use the account that posts
 the #OKXAI video**, so the entry and the post match.
 
-**Wallet → Connect Wallet:** connect **MetaMask** (`0x4580…22376`). It's for prize
+**Wallet → Connect Wallet:** connect your personal **MetaMask**. It's for prize
 payout and it's the wallet that can do a browser wallet-connect handshake. The Agentic
 Wallet accounts (`0x015bfbe8…` ASP, `0x0b2a11d4…` buyer) are TEE-backed and driven via
 the `onchainos` CLI — they **cannot** connect in a browser. Don't try.

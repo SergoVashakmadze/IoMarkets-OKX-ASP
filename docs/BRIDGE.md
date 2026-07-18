@@ -15,7 +15,7 @@ Goal: move your **USDT on Arbitrum** to **USDT0 on X Layer**, delivered to the
 
 | | Address | Role |
 |---|---|---|
-| MetaMask (source) | `0x4580…322376` | holds the bought USDT + ETH gas |
+| MetaMask (source) | *personal wallet — see local notes* | holds the bought USDT + ETH gas |
 | **Account 2 — BUYER (destination)** | **`0x0b2a11d49c2cd72791987d0bc2203729733fdba0`** | **bridge here.** Pays for the demo calls |
 | Account 1 — ASP (do NOT bridge here) | `0x015bfbe816635b173e924688fba8794e30031266` | the `payTo`; holds the #5774 identity; receives the payments |
 
@@ -29,7 +29,7 @@ need OKB gas to move them again.
 
 ## Preconditions
 - [x] Banxa cool-off cleared → **USDT visible on Arbitrum** in MetaMask (Jul 16)
-- [x] **ETH on Arbitrum** for gas (~$17 — confirmed)
+- [x] **ETH on Arbitrum** for gas (confirmed)
 - [ ] Destination copied **char-for-char**: `0x0b2a11d49c2cd72791987d0bc2203729733fdba0`
 
 ---

@@ -78,5 +78,6 @@ demo/walkthrough (**≤90 seconds**), then link the post in the Google form.
 - ❌ **"Listed / approved / live on the OKX.AI marketplace"** — #5774 is still
   **"Listing under review" / "not listed"**. Say "registered as ASP #5774", not
   "listed". Do not caption the video with a LIVE badge that isn't there.
-- ❌ Any volume, revenue or user numbers beyond the real ones (0.042 USDT0 earned
-  across 5 calls as of Jul 17 — that's a demo, not traction).
+- ❌ Any volume, revenue or user numbers beyond the real ones (**0.07 USDT0 earned,
+  verified on-chain Jul 18** — that's a demo, not traction). The earlier "0.042 across
+  5 calls" figure is stale; more demo runs happened after it was written.

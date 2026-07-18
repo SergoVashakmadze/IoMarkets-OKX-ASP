@@ -14,8 +14,8 @@
 
 - All test payments moved between **two accounts that both belong to the repo owner** (OKX Agentic
   Wallet Account 1 and Account 2). No third-party or Claude-controlled wallet was ever used.
-- **Total spent on test calls: 0.042 USDT0.** That amount landed in the owner's own Account 1, so the
-  **net loss is ~0**.
+- **Total spent on test calls: 0.07 USDT0** (verified on-chain 2026-07-18). That amount landed in the
+  owner's own Account 1, so the **net loss is ~0**.
 - Gas was paid by the OKX facilitator relayer, not from the owner's balance.
 - All activity was on **X Layer mainnet** (`eip155:196`). No testnet transactions were ever executed —
   testnet appears in the docs only as advice that was not followed.
@@ -48,9 +48,9 @@ fiat on-ramp ──▶ OKX exchange ──withdraw──▶ X Layer
                                                ▼
                           Account 2 (payer)  0x0b2a11d4…
                                                │
-                             5 paid x402 calls │ 0.042 USDT0 total
+                                paid x402 calls │ 0.07 USDT0 total
                                                ▼
-                          Account 1 (ASP payee) 0x015bfbe8…  earned 0.042 USDT0
+                          Account 1 (ASP payee) 0x015bfbe8…  earned 0.07 USDT0
 
         gas paid separately by OKX facilitator relayer 0xe8fa08ba…
 ```
@@ -64,8 +64,9 @@ spend are recorded, since those are what the audit needs.
 |---|---|---|
 | Price — `get_vwap` | 0.002 USDT0 / call | `docs/ASP_LISTING.md:33`, `src/config.ts` |
 | Price — `get_price_proof` | 0.01 USDT0 / call | `docs/ASP_LISTING.md:33`, `src/config.ts` |
-| **Total spent, 5 paid calls** | **0.042 USDT0** | `docs/HANDOVER_OKX.md:17,72` |
-| Same figure, rounded elsewhere | "~0.05 USDT0" | `docs/SUBMIT_NOW.md:11` |
+| **Total spent on paid calls** | **0.07 USDT0** | on-chain `balanceOf`, verified 2026-07-18 |
+| — superseded doc figure | "0.042 across 5 calls" | `docs/HANDOVER_OKX.md:17,72` (stale) |
+| — superseded doc figure | "~0.05 USDT0" | `docs/SUBMIT_NOW.md:11` (stale) |
 | Cost per full demo run | ~0.022 USDT0 | `scripts/record-demo.sh:19`, `scripts/demo-run.sh:3` |
 
 ---

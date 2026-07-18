@@ -85,7 +85,7 @@ onchainos wallet switch f8234c27-f5ad-413b-b935-8f10e0edaa2f   # buyer
 bash scripts/record-demo.sh                                     # needs xvfb + xterm
 onchainos wallet switch a0ad600d-fba7-407d-a895-90114f25fb85   # back — #5774 lives here
 ```
-Costs ~$0.022 of real USDT0 per run. Buyer holds ~24.9 USDT0.
+Costs ~$0.022 of real USDT0 per run. The buyer wallet is funded for thousands more runs.
 
 > **Local gotcha:** this laptop's resolver does DNS64 and its NAT64 gateway is broken,
 > so ~20–50% of connections to the endpoint fail from here and look like the server is

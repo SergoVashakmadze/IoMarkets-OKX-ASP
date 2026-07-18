@@ -41,7 +41,7 @@ Network            eip155:196   (X Layer mainnet)
 USDT0 contract     0x779ded0c9e1022225f8e0630b35a9b54be713736
 Buyer  (Account 2) 0x0b2a11d49c2cd72791987d0bc2203729733fdba0
 ASP / payTo (Acct 1) 0x015bfbe816635b173e924688fba8794e30031266
-MetaMask (prizes)  0x4580…22376
+MetaMask (prizes)  personal wallet — see local notes
 Proof public key   a95fc43400976d6f324427765987cd8676e69fddaf0a49b57d309d4db2743cf4
 ```
 

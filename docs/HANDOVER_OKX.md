@@ -12,9 +12,10 @@ before 2026-07-17 23:59 UTC — ~26h left at time of writing.**
 works, and the proof tier now actually emits a signed attestation (it never did
 before — see below).
 
-- **Funded.** Banxa delivered 25.39 USDT to the **OKX exchange** (not MetaMask), and
-  it withdrew straight to X Layer with **no cooling-off hold**. Buyer account holds
-  **24.958 USDT0**; the ASP has earned **0.042 USDT0** across 5 real paid calls.
+- **Funded.** Banxa delivered to the **OKX exchange** (not MetaMask), and it withdrew
+  straight to X Layer with **no cooling-off hold**. The buyer account is funded for
+  thousands of calls; the ASP has earned **0.07 USDT0** from real paid calls
+  (verified on-chain Jul 18).
 - **Demo verified live:** 402 → TEE-signed EIP-3009 → settle → 200 + data, payer
   `0x0b2a11d4…` → payTo `0x015bfbe8…`. A real transfer between two addresses.
 - **Proof tier fixed and verified:** a paid `/v1/proof/price` returns
@@ -55,22 +56,26 @@ verified sound**. The blockers are **funding** (ours) and **listing approval**
 
 ### Funding status (Jul 15)
 OKX-exchange withdrawal was blocked by a UK first-purchase 24h cooling-off, so funding
-pivoted to **MetaMask**: bought **~24 USDT on Arbitrum** (Banxa — still in a 24h
-cool-off as of Jul 15 night) + **~$17 ETH on Arbitrum** (Ramp — landed, confirmed on
-Arbitrum) for bridge gas. Next: **bridge Arbitrum USDT → X Layer USDT0** to the
-Agentic Wallet — see [`BRIDGE.md`](BRIDGE.md). MetaMask source addr `0x4580…322376`
-(≠ Agentic Wallet — bridge to a **custom recipient**).
+pivoted to **MetaMask**: bought USDT on Arbitrum (Banxa — still in a 24h cool-off as
+of Jul 15 night) + ETH on Arbitrum (Ramp — landed, confirmed on Arbitrum) for bridge
+gas. Next: **bridge Arbitrum USDT → X Layer USDT0** to the Agentic Wallet — see
+[`BRIDGE.md`](BRIDGE.md). The MetaMask source address is a personal wallet
+(≠ Agentic Wallet — bridge to a **custom recipient**); it's recorded in the local
+notes, not here.
 
 ### Funding status (Jul 16 ~23:00 UTC) — DONE ✅
 
 Banxa delivered to the **OKX exchange**, not MetaMask — which made the bridge
 unnecessary. `FUNDING.md`'s withdrawal route worked with **no cooling-off hold**.
 
-| Where | Balance | Notes |
+| Where | Role | Notes |
 |---|---|---|
-| **Buyer — Account 2** `0x0b2a11d4…dba0` | **24.958 USDT0** (X Layer) | pays for demo calls |
-| ASP — Account 1 `0x015bfbe8…1266` | **0.042 USDT0** | earned from 5 paid calls |
-| MetaMask `0x45800…22376` (Arbitrum) | 0.00899 ETH (~$16.90) | unused; bridge not needed |
+| **Buyer — Account 2** `0x0b2a11d4…dba0` | prepaid float (X Layer) | pays for demo calls |
+| ASP — Account 1 `0x015bfbe8…1266` | revenue | earned from real paid calls |
+| Personal MetaMask (Arbitrum) | unused | bridge not needed |
+
+> Balances are not recorded in this public repo. See the gitignored
+> `docs/TEST_TRANSACTIONS_AUDIT.local.md` for current figures and the sweep plan.
 
 **Two accounts, and it matters.** The Agentic Wallet had only Account 1, whose X Layer
 address **is** the `payTo` — so funding it would have made the demo pay itself
@@ -128,8 +133,8 @@ proven **both** ways: forgeries rejected, genuine proofs accepted. No redeploy n
 > To re-check without exposing the key, run it *inside the container* (never source
 > `.env` locally):
 > ```
-> ssh root@89.167.70.245 'docker exec -i iomarkets-okx-server sh -c "cat > /app/chk.mjs"' < chk.mjs
-> ssh root@89.167.70.245 'docker exec iomarkets-okx-server node /app/chk.mjs; docker exec iomarkets-okx-server rm -f /app/chk.mjs'
+> ssh root@$OKX_HOST 'docker exec -i iomarkets-okx-server sh -c "cat > /app/chk.mjs"' < chk.mjs
+> ssh root@$OKX_HOST 'docker exec iomarkets-okx-server node /app/chk.mjs; docker exec iomarkets-okx-server rm -f /app/chk.mjs'
 > ```
 > where `chk.mjs` derives with `@noble/ed25519` and prints public values only.
 
@@ -179,7 +184,9 @@ debugging live on camera. One-line fix.
 Deployed as a **separate product** on the existing Hetzner VPS, **sibling to the
 untouched** Algorand-settled `api.iomarkets.ai`.
 
-- **Host:** `root@89.167.70.245` (SSH key-based; the laptop's `~/.ssh/id_ed25519`).
+- **Host:** `root@$OKX_HOST` (SSH key-based; the laptop's `~/.ssh/id_ed25519`). The
+  literal IP is kept out of this public repo — it's in the gitignored
+  `docs/TEST_TRANSACTIONS_AUDIT.local.md`, and in your SSH config / Cloudflare DNS.
 - **Dir:** `/root/iomarkets-okx/` — `docker-compose.okx.yml` runs:
   - `iomarkets-okx-server` (this app) + `iomarkets-okx-ingester` (auto-reconnect OKX
     WS → shared QuestDB). Both on the existing `iomarkets_default` docker network.
@@ -189,7 +196,7 @@ untouched** Algorand-settled `api.iomarkets.ai`.
 - **TLS/proxy:** the existing single **Caddy** (`/root/iomarkets/Caddyfile`) got one
   appended site block: `okx.iomarkets.ai { reverse_proxy okx-server:3000 }`
   (backup at `/root/iomarkets/Caddyfile.bak`). DNS: Cloudflare A record
-  `okx` → `89.167.70.245`, **grey cloud (DNS-only)**.
+  `okx` → `$OKX_HOST`, **grey cloud (DNS-only)**.
 - **Env on box:** `/root/iomarkets-okx/.env` (chmod 600) — same creds as the laptop
   `.env` but with `QUESTDB_HOST=questdb`, the shared QuestDB password, and
   `PUBLIC_BASE_URL=https://okx.iomarkets.ai`.
@@ -262,11 +269,11 @@ stay stable so existing attestations verify).
 curl -s https://okx.iomarkets.ai/health
 
 # fresh OKX trades flowing into the shared QuestDB? (run on the box)
-ssh root@89.167.70.245 "curl -s -G 'http://localhost:9000/exec' --data-urlencode \
+ssh root@$OKX_HOST "curl -s -G 'http://localhost:9000/exec' --data-urlencode \
   \"query=SELECT count(),max(ts) FROM trades WHERE source='okx' AND ts>dateadd('m',-10,now());\""
 
 # restart the OKX stack on the box
-ssh root@89.167.70.245 "cd /root/iomarkets-okx && docker compose -f docker-compose.okx.yml up -d"
+ssh root@$OKX_HOST "cd /root/iomarkets-okx && docker compose -f docker-compose.okx.yml up -d"
 ```
 
 ## Notes / risks

@@ -117,7 +117,7 @@ MCP
 | Proof key | `https://okx.iomarkets.ai/v1/proof/pubkey` | Proof public key — verify any price |
 
 ## Wallet
-**Connect MetaMask** (`0x4580…22376`). The Agentic Wallet accounts (`0x015bfbe8…`,
+**Connect your personal MetaMask.** The Agentic Wallet accounts (`0x015bfbe8…`,
 `0x0b2a11d4…`) are TEE-backed and CLI-only — they cannot do a browser handshake.
 
 ## Images (up to 4 — 1280x720)
